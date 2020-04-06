@@ -44,7 +44,7 @@ Inspiration for Tempest in a Teapot was originally the 1981 Atari coin-op arcade
  When all of the shapes have been destroyed or are on the top of the tube with you, you zoom down the tube. Don't get impaled on those spikes that have been left behind. If you get to the bottom of the tube, you will fly out of the teapot that will be exploding all around you. And you will be back in the teapot field with one less pot to shoot. Also note that tubes start of with only a few walkers showing up. But as you go on, more shapes of more lethal actions show up with each new teapot you enter. Since each enemy is also worth a couple of hundred points and there are dozens in each in any teapot, the total score increases much more rapidly when you go inside the teapots rather than staying outside to shoot them up.
 
 ## Status
-#### Version .1
+### Version .1
 WebGL version built for first pass on tekshire.com web site.
 
 ## To Do
