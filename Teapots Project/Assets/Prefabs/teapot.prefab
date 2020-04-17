@@ -122,3 +122,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41c1617f8d0504a828c270070021d347, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  teapotBoundryRadius: 20
+  startVector: {x: 0, y: 0, z: 0}
+  teapotVelocity: {x: 0, y: 0, z: 0}
