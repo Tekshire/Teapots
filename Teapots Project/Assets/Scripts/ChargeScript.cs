@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class ChargeScript : MonoBehaviour
 {
-    public const float maxRadius = 25f;
+    public const float maxRadius = 40f;
     public const float maxRadiusSq = maxRadius * maxRadius;
     public float shotRadiusSq;
-    public float shotSpeed = 2.0f;
+    public float shotSpeed = 4.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -27,7 +27,7 @@ public class ChargeScript : MonoBehaviour
 
         if (x * x + y * y + z * z > maxRadiusSq)
         {
-            // We've gone to far, so destroy charge.
+            // We've gone too far, so destroy charge.
             Destroy(gameObject);
         }
         else
@@ -36,4 +36,11 @@ public class ChargeScript : MonoBehaviour
             transform.Translate(Vector3.up * Time.deltaTime * shotSpeed);
         }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Destroy(gameObject);
+        Destroy(other.gameObject);
+    }
+
 }
