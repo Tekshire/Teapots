@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class ChargeScript : MonoBehaviour
 {
-    public const float maxRadius = 40f;
-    public const float maxRadiusSq = maxRadius * maxRadius;
-    public float shotRadiusSq;
-    public float shotSpeed = 4.0f;
+    private const float maxRadius = 40f;
+    private const float maxRadiusSq = maxRadius * maxRadius;
+    private float shotRadiusSq;
+    public float shotSpeed = 3.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -33,7 +33,7 @@ public class ChargeScript : MonoBehaviour
         else
         {
             // Normal location, so keep it moving until it hits a trigger.
-            transform.Translate(Vector3.up * Time.deltaTime * shotSpeed);
+            transform.Translate(-Vector3.up * Time.deltaTime * shotSpeed);
         }
     }
 
