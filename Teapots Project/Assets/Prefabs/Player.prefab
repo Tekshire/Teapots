@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 494884861358258557}
   - component: {fileID: 7959936417913809126}
   - component: {fileID: 8481078639945694944}
+  - component: {fileID: 6679794349055446811}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -109,11 +110,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   horizontalRawInput: 0
   verticalRawInput: 0
-  turnSpeed: 0
-  shipSpeed: 0
-  shotSpeed: 0
+  turnSpeed: 1
+  shipSpeed: 1
+  shotSpeed: 3
   startMouseX: 0
   deltaMouseX: 0
-  chargePrefab: {fileID: 7202625800894569250, guid: ee4a302d2ea61482796b1a7135680aec,
+  chargePrefab: {fileID: 2457680363345007208, guid: f9cf29e67fe344023b306ede00145c4b,
     type: 3}
   rb: {fileID: 0}
+--- !u!64 &6679794349055446811
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 494884861356058557}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: 14
+  m_Mesh: {fileID: 4300000, guid: 03625d989cca049509a50e0644ceca7f, type: 3}

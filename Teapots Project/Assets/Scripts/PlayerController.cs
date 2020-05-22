@@ -21,8 +21,10 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        turnSpeed = 2.0f;
-        shotSpeed = 20.0f;
+        // Let speeds be set in Inspector while developing.
+        // May want to programatically init to allow for increased speed as we go up levels.
+//        turnSpeed = 1.0f;
+//        shotSpeed = 10.0f;
         startMouseX = Input.mousePosition.x;
     }
 
@@ -47,25 +49,36 @@ public class PlayerController : MonoBehaviour
 
         // yaw:
         if (Input.GetKey(KeyCode.D) || horizontalRawInput == 1)
-            torque.z -= turnSpeed;
+            torque.y += turnSpeed;
         if (Input.GetKey(KeyCode.A) || horizontalRawInput == -1)
-            torque.z += turnSpeed;
+            torque.y -= turnSpeed;
         // pitch:
-        if (Input.GetKey(KeyCode.W) || verticalRawInput == 1)
-            torque.x -= turnSpeed;
-        if (Input.GetKey(KeyCode.S) || verticalRawInput == -1)
-            torque.x += turnSpeed;
+       /// if (Input.GetKey(KeyCode.W) || verticalRawInput == 1)
+       ///     torque.x -= turnSpeed;
+       /// if (Input.GetKey(KeyCode.S) || verticalRawInput == -1)
+       ///     torque.x += turnSpeed;
 
         rb.AddRelativeTorque(torque);
 
 
-        // Test output
-       // Vector3 currentEulerAngles = rb.transform.rotation;
-      //  Quaternion currentRotation;
-      //  float x;
-      //  float y;
-      //  float z;
-      //  Debug.Log(myRotation.eulerAngles);
+        // We rotate horizontally and vertical. If we do both at the same time,
+        // the added vectors can wind up banking our ship, which i find confusling.
+        // This is true even if we do 2 separate calls to AddRelativeTorgue each
+        // with only the horizontal torque or the vertical torgue. See if it makes
+        // any difference if we put the AddRelativeForce call in between.
+
+        // Forward speed
+        //        float inX = Input.mousePosition.x;
+        //        deltaMouseX = inX - startMouseX;
+        //        if (deltaMouseX < 0.0f)
+        //        {
+        //            // Make this our new start point so we don't have to roll a long ways up to get delta positive again.
+        //            deltaMouseX = 0;
+        //            startMouseX = inX;
+        //        }
+        //        shipSpeed = deltaMouseX / 20f;    // Do we need to scale this for better control?
+        
+        rb.AddRelativeForce(0f, 0f, shipSpeed);
 
 
 
@@ -105,19 +118,6 @@ public class PlayerController : MonoBehaviour
         //
         //        rb.AddRelativeTorque(torque);
 
-        // Forward speed
-        //        float inX = Input.mousePosition.x;
-        //        deltaMouseX = inX - startMouseX;
-        //        if (deltaMouseX < 0.0f)
-        //        {
-        //            // Make this our new start point so we don't have to roll a long ways up to get delta positive again.
-        //            deltaMouseX = 0;
-        //            startMouseX = inX;
-        //        }
-        //        shipSpeed = deltaMouseX / 20f;    // Do we need to scale this for better control?
-        //        shipSpeed = 1f;    // Hack just to see if constant speed works better
-        //
-        //        rb.AddRelativeForce(0f, shipSpeed, 0f);
 
 
         /*
@@ -180,7 +180,12 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             // launch projectile
-            Instantiate(chargePrefab, transform.position, chargePrefab.transform.rotation);
+            ///GameObject sgo = Instantiate(chargePrefab, transform.position, chargePrefab.transform.rotation);
+            GameObject sgo = Instantiate(chargePrefab, transform.position, transform.rotation);
+            // Make sure the shot is going the way the ship is pointing.
+            Rigidbody srb = sgo.GetComponent<Rigidbody>();
+            srb.velocity = transform.forward * shotSpeed;
+
         }
 
     }

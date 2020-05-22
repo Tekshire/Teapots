@@ -4,19 +4,18 @@ using UnityEngine;
 
 public class ChargeScript : MonoBehaviour
 {
-    private const float maxRadius = 40f;
+    private const float maxRadius = 50f;
     private const float maxRadiusSq = maxRadius * maxRadius;
     private float shotRadiusSq;
-    public float shotSpeed = 3.0f;
+    // Shot speed set as part of velocity at Charge instantiation in PlayerControl.
+    //public float shotSpeed = 2.0f;
 
-    // Start is called before the first frame update
     void Start()
     {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         // Use Quadratic Equation to calculate radius of shot in globe.
         // radius = square root(x^2 + y^2 + z^2).
@@ -32,15 +31,19 @@ public class ChargeScript : MonoBehaviour
         }
         else
         {
-            // Normal location, so keep it moving until it hits a trigger.
-            transform.Translate(-Vector3.up * Time.deltaTime * shotSpeed);
+            // Regular movement is just continuing velocity vector set up in PlayerController.
+            //transform.Translate(-Vector3.forward * Time.deltaTime * shotSpeed);
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        Destroy(gameObject);
-        Destroy(other.gameObject);
+        // I only want to blow up teapots, so check for that.
+        if (other.gameObject.tag == "Teapot")
+        {
+            Destroy(other.gameObject);
+            Destroy(gameObject);
+        }
     }
 
 }

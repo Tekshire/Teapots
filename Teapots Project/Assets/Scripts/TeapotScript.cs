@@ -21,8 +21,7 @@ public class TeapotScript : MonoBehaviour
         yOffset = transform.position.y;
     }
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         // Realign teapots so they all have different forward vectors.
 
@@ -56,8 +55,9 @@ public class TeapotScript : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        doRotate = false;
-    }
+   // No longer have trigger on teapot in order to enable bouncing off ship.
+   //private void OnTriggerEnter(Collider other)
+   // {
+   //     doRotate = false;
+   // }
 }

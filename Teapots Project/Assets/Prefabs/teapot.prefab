@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 3649331767197328803}
   m_Layer: 0
   m_Name: teapot
-  m_TagString: Untagged
+  m_TagString: Teapot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -29,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5840400238222320164}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalPosition: {x: -0, y: -5, z: 0}
   m_LocalScale: {x: 20, y: 20, z: 20}
   m_Children: []
   m_Father: {fileID: 0}
@@ -88,7 +88,7 @@ MeshCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5840400238222320164}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 3
   m_Convex: 1
@@ -122,3 +122,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41c1617f8d0504a828c270070021d347, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  xSpread: 10
+  zSpread: 10
+  yOffset: 0
+  rotSpeed: 2
+  rotateClockwise: 0
+  doRotate: 0
