@@ -21,14 +21,15 @@ public class TeapotScript : MonoBehaviour
         yOffset = transform.position.y;
     }
 
-    void FixedUpdate()
+    void FixedUpdate()    // Don't need Time.deltaTime when using FixedUpdate.
     {
         // Realign teapots so they all have different forward vectors.
 
         // Test calculated rotation to see what happens when we have colllisions
         if (doRotate)
         {
-            timer += Time.deltaTime * rotSpeed;
+            //timer += Time.deltaTime * rotSpeed;
+            timer += rotSpeed;
             Rotate();
         }
     }

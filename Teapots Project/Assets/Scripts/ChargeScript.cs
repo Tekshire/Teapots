@@ -4,11 +4,9 @@ using UnityEngine;
 
 public class ChargeScript : MonoBehaviour
 {
-    private const float maxRadius = 50f;
-    private const float maxRadiusSq = maxRadius * maxRadius;
-    private float shotRadiusSq;
+    private const float maxShotDist = 40f;
     // Shot speed set as part of velocity at Charge instantiation in PlayerControl.
-    //public float shotSpeed = 2.0f;
+    public float shotSpeed;
 
     void Start()
     {
@@ -17,14 +15,9 @@ public class ChargeScript : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Use Quadratic Equation to calculate radius of shot in globe.
-        // radius = square root(x^2 + y^2 + z^2).
-        // (Don't have to take square root if we compare to redius squared
-        float x = transform.position.x;
-        float y = transform.position.y;
-        float z = transform.position.z;
-
-        if (x * x + y * y + z * z > maxRadiusSq)
+        if ((transform.position.x > maxShotDist) || (transform.position.x < -maxShotDist) ||
+            (transform.position.z > maxShotDist) || (transform.position.z < -maxShotDist) ||
+            (transform.position.y > maxShotDist) || (transform.position.y < -maxShotDist))
         {
             // We've gone too far, so destroy charge.
             Destroy(gameObject);
@@ -32,6 +25,7 @@ public class ChargeScript : MonoBehaviour
         else
         {
             // Regular movement is just continuing velocity vector set up in PlayerController.
+            // (Make sure i don't add drag to charge.)
             //transform.Translate(-Vector3.forward * Time.deltaTime * shotSpeed);
         }
     }

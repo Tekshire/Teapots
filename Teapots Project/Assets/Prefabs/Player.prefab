@@ -19,7 +19,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 1
   m_IsActive: 1
 --- !u!4 &494884861356489629
 Transform:
@@ -88,9 +88,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 494884861356058557}
   serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0.5
-  m_AngularDrag: 0.05
+  m_Mass: 10
+  m_Drag: 0.05
+  m_AngularDrag: 0.2
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -108,16 +108,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39b4a5aec4f7a434489d1fe1049601c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  horizontalRawInput: 0
-  verticalRawInput: 0
   turnSpeed: 1
+  forwardSpeed: 0
   shipSpeed: 1
   shotSpeed: 3
-  startMouseX: 0
-  deltaMouseX: 0
   chargePrefab: {fileID: 2457680363345007208, guid: f9cf29e67fe344023b306ede00145c4b,
     type: 3}
   rb: {fileID: 0}
+  shipRange: 25
 --- !u!64 &6679794349055446811
 MeshCollider:
   m_ObjectHideFlags: 0
