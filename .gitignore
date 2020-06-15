@@ -54,6 +54,8 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+# WebGL build
+Teapots/
 
 # Crashlytics generated file
 crashlytics-build.properties
