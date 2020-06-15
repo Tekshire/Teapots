@@ -1,5 +1,6 @@
 #undef DEBUG_ANGLE_Y
-#define DEBUG_ANGLE_X
+#undef DEBUG_ANGLE_X
+#define TEST_BACK_FLIP
 
 using System.Collections;
 using System.Collections.Generic;
@@ -37,6 +38,7 @@ public class PlayerController : MonoBehaviour
         // May want to programatically init to allow for increased speed as we go up levels.
         turnSpeed = 15.0f;      // Good speed to get ship turning from dead stop.
         shotSpeed = 10.0f;
+        shipSpeed = 0.0f;       // Start with no forward motion.
         ///    startMouseX = Input.mousePosition.x;
 #if (DEBUG_ANGLE_Y)
         Debug.Log("Max Angular Velocity: " + rb.maxAngularVelocity);
@@ -65,11 +67,13 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.D) || horizontalRawInput == 1)
         {
             torque.y += turnSpeed;
+            //torque.z += turnSpeed;  // Try Bob's idea in tekshire.com/teapotroll
             bChangeTorqueY = true;
         }
         if (Input.GetKey(KeyCode.A) || horizontalRawInput == -1)
         {
             torque.y -= turnSpeed;
+            //torque.z -= turnSpeed;  // Try Bob's idea in tekshire.com/teapotroll
             bChangeTorqueY = true;
         }
         if (bChangeTorqueY)
@@ -101,7 +105,7 @@ public class PlayerController : MonoBehaviour
         //rigidbody.AddForce(moveDir * force);
 
 
-        /* 2. Forward speed
+        /* 2. Forward speed 
         // Forward speed
             //   rb.AddForce((Vector3.forward * deltaMouseX).normalized, ForceMode.VelocityChange);
         rb.AddForce(Vector3.up * shipSpeed, ForceMode.Force);
@@ -110,9 +114,9 @@ public class PlayerController : MonoBehaviour
         torque = Vector3.zero;
         verticalRawInput = Input.GetAxisRaw("Vertical");
         // pitch:
-       if (Input.GetKey(KeyCode.W) || verticalRawInput == 1)
+       if (Input.GetKey(KeyCode.Q))
            torque.x -= turnSpeed;
-       if (Input.GetKey(KeyCode.S) || verticalRawInput == -1)
+       if (Input.GetKey(KeyCode.E))
            torque.x += turnSpeed;
 
         rb.AddRelativeTorque(torque);
@@ -145,6 +149,16 @@ public class PlayerController : MonoBehaviour
 
         /* 3. Change Pitch */
         // Limit pitch change to -90 through 90 degrees, so we don't flip over upside down.
+        // Quaternion Note: When debugging the pitch not getting clamped, i discovered that
+        // while force is being applied and Unity physics is doing its work, when i then read
+        // the Euler angles... As the X axis angle is nearing 90 degrees, i'm expecting to
+        // see the next angle get to 91. However, the conversion from quaternion to angle
+        // determines the height of my ship is the same at either 91 OR 89! So the Euler angle
+        // conversion walks backward instead of going beyond 90. Right now i have a hack of
+        // comparing for only 85 degrees, which i do get beyond and my calculations can clamp
+        // at that value! Yay! Almost.. Turns out that as the there are ways of steering that
+        // can aggect all 3 Euler angles and my x axis comparison can break and stay broken
+        // after that. I will try a few things to see if i can mitigate this.
 
         bool bChangeTorqueX = false;
         torque = Vector3.zero;
@@ -163,7 +177,7 @@ public class PlayerController : MonoBehaviour
         }
         if (bChangeTorqueX)
         {
-#if (DEBUG_ANGLE_X)
+#if (DEBUG_ANGLE_X || TEST_BACK_FLIP)
             Debug.Log("Change pitch x by torque: " + torque);
 #endif
             // For rotation, we could just use transform change rotation, but want
@@ -171,13 +185,13 @@ public class PlayerController : MonoBehaviour
             rb.AddRelativeTorque(torque, ForceMode.Force);
             // OK, we changed the pitch more, but did we go beyound 90 degrees?
             // Mod 360 to make sure we don't compare wrapped angle values.
-#if (DEBUG_ANGLE_X)
+#if (DEBUG_ANGLE_X || TEST_BACK_FLIP)
             Debug.Log(" Changed pitch x to: " + transform.eulerAngles.x);
 #endif
          }
 
         // After applying force, angles continue to change, so check every loop through.
-#if (DEBUG_ANGLE_X)
+#if (DEBUG_ANGLE_X || TEST_BACK_FLIP)
         Debug.Log("... Before ANGLES: " + transform.eulerAngles);
 #endif
         bool bClampedPitch = false;
@@ -187,30 +201,50 @@ public class PlayerController : MonoBehaviour
         if (checkAndleX > 180f)
         {
             checkAndleX -= 360f;    // Display as negative angle
+#if (TEST_BACK_FLIP)
+            Debug.Log("if (checkAndleX > 180f), checkAndleX: " + checkAndleX);
+#endif
         }
         else if (checkAndleX < -180f)
         {
             checkAndleX += 360f;    // Display as positive angle
+#if (TEST_BACK_FLIP)
+            Debug.Log("if (checkAndleX < -180f), checkAndleX: " + checkAndleX);
+#endif
         }
         // Now see if angle exceeds -90 to 90 degrees.
-        if (checkAndleX > 90)
+        if (checkAndleX > 85f)
         {
-            checkAndleX = 90;
+            checkAndleX = 85f;
             bClampedPitch = true;
+#if (TEST_BACK_FLIP)
+            Debug.Log("if (checkAndleX > 90f), checkAndleX: " + checkAndleX);
+#endif
         }
-        else if (checkAndleX < -90)
+        else if (checkAndleX < -85f)
         {
-            checkAndleX = -90;
+            checkAndleX = -85f;
             bClampedPitch = true;
+#if (TEST_BACK_FLIP)
+            Debug.Log("if (checkAndleX < -90f), checkAndleX: " + checkAndleX);
+#endif
         }
         if (bClampedPitch)
         {
+#if (TEST_BACK_FLIP)
+            Debug.Log("##### Clamping to: " + checkAndleX);
+#endif
             // Convert new angles (well, x) to quaternion
             float origAngleY = transform.eulerAngles.y % 360f;
             float origAngleZ = transform.eulerAngles.z % 360f;
+            //float origAngleY = transform.eulerAngles.y;
+            //float origAngleZ = transform.eulerAngles.z;
             transform.eulerAngles = new Vector3(checkAndleX, origAngleY, origAngleZ);
+#if (DEBUG_ANGLE_X || TEST_BACK_FLIP)
+            Debug.Log("+++ After Clamp: " + transform.eulerAngles);
+#endif
         }
-#if (DEBUG_ANGLE_X)
+#if (DEBUG_ANGLE_X || TEST_BACK_FLIP)
         Debug.Log("*** After ANGLES: " + transform.eulerAngles);
 #endif
 
