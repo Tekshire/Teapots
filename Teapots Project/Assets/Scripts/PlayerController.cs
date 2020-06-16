@@ -1,6 +1,7 @@
 #undef DEBUG_ANGLE_Y
 #undef DEBUG_ANGLE_X
 #undef TEST_BACK_FLIP
+#define TEST_GYROSCOPE
 
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public float shipSpeed;
     public float shipSpeedMax;
     public float shipSpeedStep;
+    public float levelSpeed;
     public float shotSpeed;
 ///    public float startMouseX;
 ///    public float deltaMouseX;
@@ -45,6 +47,7 @@ public class PlayerController : MonoBehaviour
         shipSpeed = 0.0f;       // Start with no forward motion.
         shipSpeedMax = 4.0f;
         shipSpeedStep = 0.5f;
+        levelSpeed = 1.0f;      // Don't level off too fast so we hopefully don't notice it.
     ///    startMouseX = Input.mousePosition.x;
 #if (DEBUG_ANGLE_Y)
         Debug.Log("Max Angular Velocity: " + rb.maxAngularVelocity);
@@ -55,7 +58,7 @@ public class PlayerController : MonoBehaviour
         debugAngleX = transform.eulerAngles.x;
         Debug.Log(" Starting pitch X: " + debugAngleX);
 #endif
-}
+    }
 
 
 void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
@@ -106,48 +109,10 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         /* Close 1. Change horizontal rotation Y */
 
 
-        // Use NORMALIZED to keep claw from accelerating too fast
-        //// create a normalized vector in the rotation direction
-        //var moveDir = Vector3.Cross(rigidbody.angular.velocity, Vector3.up).normalized;
-        //rigidbody.AddForce(moveDir * force);
+        // Moved all rotation changes into sequence in case we can coallese all logic
+        // into a single bit of control.
 
-
-        /* 2. Forward speed */
-        // Forward speed
-        bool bChangeSpeed = false;
-        // No arrow keys to affect forward speed at this time.
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            shipSpeed += shipSpeedStep;
-            if (shipSpeed > shipSpeedMax)
-                shipSpeed = shipSpeedMax;
-            bChangeSpeed = true;
-        }
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            shipSpeed -= shipSpeedStep;
-            if (shipSpeed < 0)
-                shipSpeed = 0;
-            bChangeSpeed = true;
-        }
-        if (bChangeSpeed)
-        {
-            // rb.AddRelativeForce((Vector3.forward * deltaMouseX).normalized, ForceMode.VelocityChange);
-            rb.velocity = transform.forward * shipSpeed;
-        }
-
-        //to get the direction as a unit vector do this:
-        //Vector3 direction = velocity.normalized;
-        //To get the speed do this:
-        //float speed = velocity.magnitude;
-
-        /* Close 2. Forword speed */
-
-
-
-
-
-        /* 3. Change Pitch */
+        /* 2. Change Pitch */
         // Limit pitch change to -90 through 90 degrees, so we don't flip over upside down.
         // Quaternion Note: When debugging the pitch not getting clamped, i discovered that
         // while force is being applied and Unity physics is doing its work, when i then read
@@ -188,7 +153,7 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
 #if (DEBUG_ANGLE_X || TEST_BACK_FLIP)
             Debug.Log(" Changed pitch x to: " + transform.eulerAngles.x);
 #endif
-         }
+        }
 
         // After applying force, angles continue to change, so check every loop through.
 #if (DEBUG_ANGLE_X || TEST_BACK_FLIP)
@@ -276,7 +241,122 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         //        transform.rotation.eulerAngles.y = Mathf.Clamp(transform.eulerAngles.y, -90, 90);
 
 
-        /* Close 3. Change Pitch */
+        /* Close 2. Change Pitch */
+
+
+        /* 3. Level Ship */
+        // As we change rotation (yaw and pitch) the vector changes can also affect roll.
+        // That leaves the ship flying at an angle to the horizon, which can be disorienting.
+        // Pretend we have a gyroscope that can level off the ship when we are not actively
+        // changing the other 2 axis. Bring the roll back to 0 degrees off the z axis.
+        if (!bChangeTorqueX && !bChangeTorqueY)
+        {
+#if (TEST_GYROSCOPE)
+            // Begin by seeing what vector we are flying at.
+            Debug.Log("----- Leveling up from: " + transform.eulerAngles);
+#endif
+            float checkAndleZ = transform.eulerAngles.z % 360f;
+#if (TEST_GYROSCOPE)
+            Debug.Log("Starting with Z angle: " + checkAndleZ);
+#endif
+            if (!Mathf.Approximately(checkAndleZ, 0.0f))
+                {
+#if (TEST_GYROSCOPE)
+                    Debug.Log("Not approximately 0: " + checkAndleZ);
+#endif
+                // If not already level, we know we will be making a change.
+
+                // If angle > 180, it means it is on the other side of the circle;
+                // reverse the angle for easier comparison.
+                if (checkAndleZ > 180f)
+                {
+                    checkAndleZ -= 360f;    // Display as negative angle
+#if (TEST_GYROSCOPE)
+                    Debug.Log("checkAndleZ > 180f: " + checkAndleZ);
+#endif
+                }
+                else if (checkAndleZ < -180f)
+                {
+                    checkAndleZ += 360f;    // Display as positive angle
+#if (TEST_GYROSCOPE)
+                    Debug.Log("checkAndleZ < -180f: " + checkAndleZ);
+#endif
+                }
+                // Now see if angle exceeds -levelSpeed to levelSpeed degrees.
+                if (checkAndleZ > levelSpeed)
+                {
+                    checkAndleZ -= levelSpeed;
+#if (TEST_GYROSCOPE)
+                    Debug.Log("checkAndleZ > levelSpeed: " + checkAndleZ);
+#endif
+                }
+                else if (checkAndleZ < -levelSpeed)
+                {
+                    checkAndleZ += levelSpeed;
+#if (TEST_GYROSCOPE)
+                    Debug.Log("checkAndleZ < -levelSpeed: " + checkAndleZ);
+#endif
+                }
+                else
+                {
+                    checkAndleZ = 0.0f;
+#if (TEST_GYROSCOPE)
+                    Debug.Log("else: " + checkAndleZ);
+#endif
+                }
+#if (TEST_GYROSCOPE)
+                Debug.Log("New Z angle: " + checkAndleZ);
+#endif
+            // Convert new angles (well, x) to quaternion
+            float origAngleX = transform.eulerAngles.x % 360f;
+            float origAngleY = transform.eulerAngles.y % 360f;
+            //float origAngleX = transform.eulerAngles.x;
+            //float origAngleY = transform.eulerAngles.y;
+            transform.eulerAngles = new Vector3(origAngleX, origAngleY, checkAndleZ);
+#if (TEST_GYROSCOPE)
+            Debug.Log("transform.eulerAngles: " + transform.eulerAngles);
+#endif
+            }
+        }
+        /* Close 3. Level Ship */
+
+                // Use NORMALIZED to keep claw from accelerating too fast
+                //// create a normalized vector in the rotation direction
+                //var moveDir = Vector3.Cross(rigidbody.angular.velocity, Vector3.up).normalized;
+                //rigidbody.AddForce(moveDir * force);
+
+
+        /* 4. Forward speed */
+        // Forward speed
+        bool bChangeSpeed = false;
+        // No arrow keys to affect forward speed at this time.
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            shipSpeed += shipSpeedStep;
+            if (shipSpeed > shipSpeedMax)
+                shipSpeed = shipSpeedMax;
+            bChangeSpeed = true;
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            shipSpeed -= shipSpeedStep;
+            if (shipSpeed < 0)
+                shipSpeed = 0;
+            bChangeSpeed = true;
+        }
+        if (bChangeSpeed)
+        {
+            // rb.AddRelativeForce((Vector3.forward * deltaMouseX).normalized, ForceMode.VelocityChange);
+            rb.velocity = transform.forward * shipSpeed;
+        }
+
+        //to get the direction as a unit vector do this:
+        //Vector3 direction = velocity.normalized;
+        //To get the speed do this:
+        //float speed = velocity.magnitude;
+
+        /* Close 4. Forword speed */
+
 
 
         // We rotate horizontally and vertical. If we do both at the same time,
@@ -286,7 +366,7 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         // any difference if we put the AddRelativeForce call in between.
 
 
-        /* 4. Ship Range Check */
+        /* 5. Ship Range Check */
         // Make sure ship does not get out of range.
         bool changePos = false;
         float x = transform.position.x;
@@ -328,22 +408,8 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
             // we might collide with, so can simply transform location.
             transform.position = new Vector3(x, y, z);
         }
-        /* 4. Ship Range Check */
+        /* 5. Ship Range Check */
 
-
-
-        /*
-        // Limit player movement
-//
-//        if (transform.position.x < -xRange)
-//        {
-            transform.position = new Vector3(-xRange, transform.position.y, transform.position.z);
-        }
-        if (transform.position.x > xRange)
-        {
-            transform.position = new Vector3(xRange, transform.position.y, transform.position.z);
-        }
-        */
     }
 
 
