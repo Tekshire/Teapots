@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
 {
     private float horizontalRawInput, verticalRawInput;
     public float turnSpeed;     // Radians / sec
+    public float raiseSpeed;    // Radians / sec
     public float shipSpeed;
     public float shipSpeedMax;
     public float shipSpeedStep;
@@ -39,10 +40,11 @@ public class PlayerController : MonoBehaviour
         // Let speeds be set in Inspector while developing.
         // May want to programatically init to allow for increased speed as we go up levels.
         turnSpeed = 15.0f;      // Good speed to get ship turning from dead stop.
+        raiseSpeed = 5.0f;      // Same speed as rotation was too much.
         shotSpeed = 10.0f;
         shipSpeed = 0.0f;       // Start with no forward motion.
-        shipSpeedMax = 5.0f;
-        shipSpeedStep = 1.0f;
+        shipSpeedMax = 4.0f;
+        shipSpeedStep = 0.5f;
     ///    startMouseX = Input.mousePosition.x;
 #if (DEBUG_ANGLE_Y)
         Debug.Log("Max Angular Velocity: " + rb.maxAngularVelocity);
@@ -67,6 +69,7 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         Vector3 torque = Vector3.zero;      // Torque to be added.
 
         // yaw:
+        // Using the RAW axis returns hard coded +1 or -1. (Doesn't seem so RAW to me.)
         horizontalRawInput = Input.GetAxisRaw("Horizontal");
         if (Input.GetKeyDown(KeyCode.D) || horizontalRawInput == 1)
         {
@@ -111,7 +114,6 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
 
         /* 2. Forward speed */
         // Forward speed
-            //   rb.AddForce((Vector3.forward * deltaMouseX).normalized, ForceMode.VelocityChange);
         bool bChangeSpeed = false;
         // No arrow keys to affect forward speed at this time.
         if (Input.GetKeyDown(KeyCode.Q))
@@ -130,21 +132,14 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         }
         if (bChangeSpeed)
         {
+            // rb.AddRelativeForce((Vector3.forward * deltaMouseX).normalized, ForceMode.VelocityChange);
             rb.velocity = transform.forward * shipSpeed;
         }
 
         //to get the direction as a unit vector do this:
         //Vector3 direction = velocity.normalized;
-
         //To get the speed do this:
         //float speed = velocity.magnitude;
-
-
-
-
-
-
-        ///rb.AddRelativeForce(0f, 0f, shipSpeed);
 
         /* Close 2. Forword speed */
 
@@ -172,12 +167,12 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         verticalRawInput = Input.GetAxisRaw("Vertical");
         if (Input.GetKeyDown(KeyCode.W) || verticalRawInput == 1)
         {
-            torque.x -= turnSpeed;
+            torque.x -= raiseSpeed;
             bChangeTorqueX = true;
         }
         if (Input.GetKeyDown(KeyCode.S) || verticalRawInput == -1)
         {
-            torque.x += turnSpeed;
+            torque.x += raiseSpeed;
             bChangeTorqueX = true;
         }
         if (bChangeTorqueX)
@@ -261,7 +256,6 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         // ship turns upside down. So use AddRelativeTorque to keep right arrow always turning right.
 
         //horizontalRawInput = Input.GetAxisRaw("Horizontal");
-        // Using the RAW axis returns hard coded +1 or -1. (Doesn't seem so RAW to me.)
         // verticalRawInput = Input.GetAxisRaw("Vertical");
         //Debug.Log("HIn = " + horizontalInput + " Vin = " + verticalInput + " HRaw = " + horizontalRawInput + " VRaw = " + verticalRawInput);
 
@@ -282,16 +276,6 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         //        transform.rotation.eulerAngles.y = Mathf.Clamp(transform.eulerAngles.y, -90, 90);
 
 
-        torque = Vector3.zero;
-        horizontalRawInput = Input.GetAxisRaw("Horizontal");
-
-        // yaw:
-        //        if (Input.GetKey(KeyCode.D) || horizontalRawInput == 1)
-        //            torque.z -= turnSpeed;
-        //        if (Input.GetKey(KeyCode.A) || horizontalRawInput == -1)
-        //            torque.z += turnSpeed;
-        //
-        //        rb.AddRelativeTorque(torque);
         /* Close 3. Change Pitch */
 
 
@@ -302,12 +286,10 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         // any difference if we put the AddRelativeForce call in between.
 
 
-        /* 4. Ship Range Check 
+        /* 4. Ship Range Check */
         // Make sure ship does not get out of range.
-        float x = transform.position.x;
-        float y = transform.position.y;
-        float z = transform.position.z;
         bool changePos = false;
+        float x = transform.position.x;
         if (x > shipRange)
         {
             x = shipRange;
@@ -318,6 +300,7 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
             x = -shipRange;
             changePos = true;
         }
+        float y = transform.position.y;
         if (y > shipRange)
         {
             y = shipRange;
@@ -328,6 +311,7 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
             y = -shipRange;
             changePos = true;
         }
+        float z = transform.position.z;
         if (z > shipRange)
         {
             z = shipRange;
@@ -340,17 +324,15 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         }
         if (changePos)
         {
+            // Plan is that we should be beyond the range of other objects
+            // we might collide with, so can simply transform location.
             transform.position = new Vector3(x, y, z);
         }
-        4. Ship Range Check */
+        /* 4. Ship Range Check */
 
 
 
         /*
-        //     shipSpeed += Input.GetAxis("Mouse Y");
-        //      transform.Translate(Vector3.forward * Time.deltaTime * shipSpeed);
-        //        rb.AddRelativeForce(Vector3.forward * shipSpeed);
-
         // Limit player movement
 //
 //        if (transform.position.x < -xRange)
