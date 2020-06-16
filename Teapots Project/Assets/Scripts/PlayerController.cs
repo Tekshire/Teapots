@@ -1,6 +1,6 @@
 #undef DEBUG_ANGLE_Y
 #undef DEBUG_ANGLE_X
-#define TEST_BACK_FLIP
+#undef TEST_BACK_FLIP
 
 using System.Collections;
 using System.Collections.Generic;
@@ -14,6 +14,8 @@ public class PlayerController : MonoBehaviour
     private float horizontalRawInput, verticalRawInput;
     public float turnSpeed;     // Radians / sec
     public float shipSpeed;
+    public float shipSpeedMax;
+    public float shipSpeedStep;
     public float shotSpeed;
 ///    public float startMouseX;
 ///    public float deltaMouseX;
@@ -39,7 +41,9 @@ public class PlayerController : MonoBehaviour
         turnSpeed = 15.0f;      // Good speed to get ship turning from dead stop.
         shotSpeed = 10.0f;
         shipSpeed = 0.0f;       // Start with no forward motion.
-        ///    startMouseX = Input.mousePosition.x;
+        shipSpeedMax = 5.0f;
+        shipSpeedStep = 1.0f;
+    ///    startMouseX = Input.mousePosition.x;
 #if (DEBUG_ANGLE_Y)
         Debug.Log("Max Angular Velocity: " + rb.maxAngularVelocity);
         debugAngleY = transform.eulerAngles.y;
@@ -49,10 +53,10 @@ public class PlayerController : MonoBehaviour
         debugAngleX = transform.eulerAngles.x;
         Debug.Log(" Starting pitch X: " + debugAngleX);
 #endif
-    }
+}
 
 
-    void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
+void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
     {
         // If we change rotation on both horizontal and vertical axis, the result can be a 45 degree angle bank.
         // If we want the ship to stay level in scene, Try the rotations separately.
@@ -64,13 +68,13 @@ public class PlayerController : MonoBehaviour
 
         // yaw:
         horizontalRawInput = Input.GetAxisRaw("Horizontal");
-        if (Input.GetKey(KeyCode.D) || horizontalRawInput == 1)
+        if (Input.GetKeyDown(KeyCode.D) || horizontalRawInput == 1)
         {
             torque.y += turnSpeed;
             //torque.z += turnSpeed;  // Try Bob's idea in tekshire.com/teapotroll
             bChangeTorqueY = true;
         }
-        if (Input.GetKey(KeyCode.A) || horizontalRawInput == -1)
+        if (Input.GetKeyDown(KeyCode.A) || horizontalRawInput == -1)
         {
             torque.y -= turnSpeed;
             //torque.z -= turnSpeed;  // Try Bob's idea in tekshire.com/teapotroll
@@ -105,43 +109,44 @@ public class PlayerController : MonoBehaviour
         //rigidbody.AddForce(moveDir * force);
 
 
-        /* 2. Forward speed 
+        /* 2. Forward speed */
         // Forward speed
             //   rb.AddForce((Vector3.forward * deltaMouseX).normalized, ForceMode.VelocityChange);
-        rb.AddForce(Vector3.up * shipSpeed, ForceMode.Force);
-        Debug.Log("Forward vector: " + Vector3.up + "; speed: " + shipSpeed + "; velocity: " + rb.velocity);
+        bool bChangeSpeed = false;
+        // No arrow keys to affect forward speed at this time.
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            shipSpeed += shipSpeedStep;
+            if (shipSpeed > shipSpeedMax)
+                shipSpeed = shipSpeedMax;
+            bChangeSpeed = true;
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            shipSpeed -= shipSpeedStep;
+            if (shipSpeed < 0)
+                shipSpeed = 0;
+            bChangeSpeed = true;
+        }
+        if (bChangeSpeed)
+        {
+            rb.velocity = transform.forward * shipSpeed;
+        }
 
-        torque = Vector3.zero;
-        verticalRawInput = Input.GetAxisRaw("Vertical");
-        // pitch:
-       if (Input.GetKey(KeyCode.Q))
-           torque.x -= turnSpeed;
-       if (Input.GetKey(KeyCode.E))
-           torque.x += turnSpeed;
+        //to get the direction as a unit vector do this:
+        //Vector3 direction = velocity.normalized;
 
-        rb.AddRelativeTorque(torque);
+        //To get the speed do this:
+        //float speed = velocity.magnitude;
 
 
-        // We rotate horizontally and vertical. If we do both at the same time,
-        // the added vectors can wind up banking our ship, which i find confusling.
-        // This is true even if we do 2 separate calls to AddRelativeTorgue each
-        // with only the horizontal torque or the vertical torgue. See if it makes
-        // any difference if we put the AddRelativeForce call in between.
 
-        // Forward speed
-        //        float inX = Input.mousePosition.x;
-        //        deltaMouseX = inX - startMouseX;
-        //        if (deltaMouseX < 0.0f)
-        //        {
-        //            // Make this our new start point so we don't have to roll a long ways up to get delta positive again.
-        //            deltaMouseX = 0;
-        //            startMouseX = inX;
-        //        }
-        //        shipSpeed = deltaMouseX / 20f;    // Do we need to scale this for better control?
-        
-        rb.AddRelativeForce(0f, 0f, shipSpeed);
 
-        Close 2. Forword speed */
+
+
+        ///rb.AddRelativeForce(0f, 0f, shipSpeed);
+
+        /* Close 2. Forword speed */
 
 
 
@@ -165,12 +170,12 @@ public class PlayerController : MonoBehaviour
 
         // pitch:
         verticalRawInput = Input.GetAxisRaw("Vertical");
-        if (Input.GetKey(KeyCode.W) || verticalRawInput == 1)
+        if (Input.GetKeyDown(KeyCode.W) || verticalRawInput == 1)
         {
             torque.x -= turnSpeed;
             bChangeTorqueX = true;
         }
-        if (Input.GetKey(KeyCode.S) || verticalRawInput == -1)
+        if (Input.GetKeyDown(KeyCode.S) || verticalRawInput == -1)
         {
             torque.x += turnSpeed;
             bChangeTorqueX = true;
@@ -288,6 +293,13 @@ public class PlayerController : MonoBehaviour
         //
         //        rb.AddRelativeTorque(torque);
         /* Close 3. Change Pitch */
+
+
+        // We rotate horizontally and vertical. If we do both at the same time,
+        // the added vectors can wind up banking our ship, which i find confusling.
+        // This is true even if we do 2 separate calls to AddRelativeTorgue each
+        // with only the horizontal torque or the vertical torgue. See if it makes
+        // any difference if we put the AddRelativeForce call in between.
 
 
         /* 4. Ship Range Check 
