@@ -20,12 +20,14 @@ public class PlayerController : MonoBehaviour
     public float shipSpeedStep;
     public float levelSpeed;
     public float shotSpeed;
-///    public float startMouseX;
-///    public float deltaMouseX;
+    public float shipRange = 25f;
+    ///    public float startMouseX;
+    ///    public float deltaMouseX;
     public GameObject chargePrefab;
     public Rigidbody rb;
+    public AudioSource playerAudioSource;
+    public AudioClip shotSound;
 
-    public float shipRange = 25f;
 
 #if (DEBUG_ANGLE_Y)
     float debugAngleY;       // DEBUG
@@ -39,6 +41,8 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        playerAudioSource = GetComponent<AudioSource>();
+
         // Let speeds be set in Inspector while developing.
         // May want to programatically init to allow for increased speed as we go up levels.
         turnSpeed = 15.0f;      // Good speed to get ship turning from dead stop.
@@ -48,7 +52,7 @@ public class PlayerController : MonoBehaviour
         shipSpeedMax = 4.0f;
         shipSpeedStep = 0.5f;
         levelSpeed = 1.0f;      // Don't level off too fast so we hopefully don't notice it.
-    ///    startMouseX = Input.mousePosition.x;
+        ///    startMouseX = Input.mousePosition.x;
 #if (DEBUG_ANGLE_Y)
         Debug.Log("Max Angular Velocity: " + rb.maxAngularVelocity);
         debugAngleY = transform.eulerAngles.y;
@@ -431,6 +435,8 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
             // Make sure the shot is going the way the ship is pointing.
             Rigidbody srb = sgo.GetComponent<Rigidbody>();
             srb.velocity = transform.forward * shotSpeed;
+            // Eventually check for sound
+            playerAudioSource.PlayOneShot(shotSound, 1.0f);
         }
     }
 }
