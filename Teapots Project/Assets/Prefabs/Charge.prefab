@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 7301631192252257747}
   m_Layer: 0
   m_Name: Charge
-  m_TagString: Untagged
+  m_TagString: Charge
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -1,7 +1,8 @@
 #undef DEBUG_ANGLE_Y
 #undef DEBUG_ANGLE_X
 #undef TEST_BACK_FLIP
-#define TEST_GYROSCOPE
+#undef TEST_GYROSCOPE
+#define TRACE_COLLISIONS
 
 using System.Collections;
 using System.Collections.Generic;
@@ -439,5 +440,16 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
             playerAudioSource.PlayOneShot(shotSound, 1.0f);
         }
     }
+
+
+    private void OnCollisionEnter(Collision collision)
+    {
+#if (TRACE_COLLISIONS)
+        Debug.Log("Player OnCollisionEnter: " + gameObject + " collided with " + collision.gameObject);
+#endif
+        // Just seeing if we come here at all.
+    }
+
+
 }
 

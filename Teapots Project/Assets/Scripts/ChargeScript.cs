@@ -1,6 +1,9 @@
-﻿using System.Collections;
+﻿#define TRACE_COLLISIONS
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 
 public class ChargeScript : MonoBehaviour
 {
@@ -30,14 +33,25 @@ public class ChargeScript : MonoBehaviour
         }
     }
 
+    // Here the "other" object is entering our charge's trigger area.
     private void OnTriggerEnter(Collider other)
     {
+#if (TRACE_COLLISIONS)
+        Debug.Log("Charge OnTriggerEnter: " + gameObject + " triggered by " + other.gameObject);
+#endif
         // I only want to blow up teapots, so check for that.
         if (other.gameObject.tag == "Teapot")
         {
+#if (TRACE_COLLISIONS)
+            Debug.Log("Charge OnTriggerEnter: Destroys: " + other.gameObject);
+#endif
             Destroy(other.gameObject);
+#if (TRACE_COLLISIONS)
+            Debug.Log("Thought if other object desstroyed, it could not later respond to trigger!");
+#endif
             Destroy(gameObject);
         }
     }
+
 
 }
