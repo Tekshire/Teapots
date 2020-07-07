@@ -1,4 +1,5 @@
 ﻿#define TRACE_COLLISIONS
+#define TEST_SOUND
 
 using System.Collections;
 using System.Collections.Generic;
@@ -18,9 +19,12 @@ public class TeapotScript : MonoBehaviour
     public bool rotateClockwise;
     public bool doRotate = false;
 
-    float timer = 0;
+    private float timer = 0;
+    private Renderer m_Renderer;
+    public AudioSource teapotAudio;    // Made public so i can play with pitch modifier in inspector
 
-    Renderer m_Renderer;
+    static float maxVel = 2.0f;
+     public AudioClip[] crashSoundArray = new AudioClip[6];
 
 
     // Start is called before the first frame update
@@ -28,6 +32,7 @@ public class TeapotScript : MonoBehaviour
     {
         //Fetch the Renderer component of the GameObject
         m_Renderer = GetComponent<Renderer>();
+        teapotAudio = GetComponent<AudioSource>();
 
         yOffset = transform.position.y;
     }
@@ -44,6 +49,49 @@ public class TeapotScript : MonoBehaviour
             timer += rotSpeed;
             Rotate();
         }
+
+#if (TEST_SOUND)
+        // Testing sounds by playing them based on key press
+        bool bPlaySound = false;
+        int crashSoundIndex = 0;
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            crashSoundIndex = 0;
+            bPlaySound = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            crashSoundIndex = 1;
+            bPlaySound = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            crashSoundIndex = 2;
+            bPlaySound = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            crashSoundIndex = 3;
+            bPlaySound = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            crashSoundIndex = 4;
+            bPlaySound = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            crashSoundIndex = 5;
+            bPlaySound = true;
+        }
+
+        if (bPlaySound)
+        {
+            Debug.Log("Trying to play crashSoundArray.");
+            teapotAudio.PlayOneShot(crashSoundArray[crashSoundIndex], 1.0f);
+        }
+#endif
     }
 
 
