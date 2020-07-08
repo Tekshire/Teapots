@@ -1,5 +1,5 @@
 ﻿#define TRACE_COLLISIONS
-#define TEST_SOUND
+#undef TEST_SOUND
 
 using System.Collections;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ public class TeapotScript : MonoBehaviour
     public AudioSource teapotAudio;    // Made public so i can play with pitch modifier in inspector
 
     static float maxVel = 2.0f;
-     public AudioClip[] crashSoundArray = new AudioClip[6];
+    public AudioClip[] crashSoundArray = new AudioClip[6];
 
 
     // Start is called before the first frame update
@@ -88,7 +88,6 @@ public class TeapotScript : MonoBehaviour
 
         if (bPlaySound)
         {
-            Debug.Log("Trying to play crashSoundArray.");
             teapotAudio.PlayOneShot(crashSoundArray[crashSoundIndex], 1.0f);
         }
 #endif
@@ -127,13 +126,23 @@ public class TeapotScript : MonoBehaviour
 #endif
     }
 
-
     private void OnCollisionEnter(Collision collision)
     {
 #if (TRACE_COLLISIONS)
         Debug.Log("Teapot OnCollisionEnter: " + gameObject + " collided with " + collision.gameObject);
 #endif
         // Generate sound if teapot collides with Player or other teapot
+        int crashSoundIndex = Random.Range(0, crashSoundArray.Length);
+        Debug.Log("Trying to play crashSoundArray[" + crashSoundIndex + "] from AudioSource: " +
+            teapotAudio);
+        //        Debug.Log("Audio Clip should be: " + crashSoundArray[crashSoundIndex]);
+        // Affect volume by how fast the ship is striking the teapot.
+        // Sound only attenuates, so value between 0.0 and 1.0. Use maxVel to make sure
+        // fasted collision equals loudest sound.
+        float collisionSpeed = collision.relativeVelocity.magnitude;
+        if (collisionSpeed > maxVel)
+            maxVel = collisionSpeed;
+        teapotAudio.PlayOneShot(crashSoundArray[crashSoundIndex], collisionSpeed/maxVel);
 
         // Change teapot color only if hit by Player
         if (collision.gameObject.CompareTag("Player"))
@@ -144,6 +153,4 @@ public class TeapotScript : MonoBehaviour
 
 
 }
-
-
 

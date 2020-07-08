@@ -131,12 +131,12 @@ MonoBehaviour:
   doRotate: 0
   teapotAudio: {fileID: 0}
   crashSoundArray:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 8300000, guid: ef0c15bda805041a7b88d8d3b18b8e27, type: 3}
+  - {fileID: 8300000, guid: 4792ef0e002e64a8f8dbc38ae08c8166, type: 3}
+  - {fileID: 8300000, guid: e2306e20d12b3448d9e138cd78b97ef6, type: 3}
+  - {fileID: 8300000, guid: 988f7f0920d3e4010b7a50a4d997c1e1, type: 3}
+  - {fileID: 8300000, guid: 576be5cb5d0d6494c845964baec6fb40, type: 3}
+  - {fileID: 8300000, guid: 0696fa8b758a34077a231609c029da77, type: 3}
 --- !u!82 &6396498521005000189
 AudioSource:
   m_ObjectHideFlags: 0
