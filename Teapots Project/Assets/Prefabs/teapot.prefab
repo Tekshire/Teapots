@@ -131,12 +131,13 @@ MonoBehaviour:
   doRotate: 0
   teapotAudio: {fileID: 0}
   crashSoundArray:
-  - {fileID: 8300000, guid: ef0c15bda805041a7b88d8d3b18b8e27, type: 3}
-  - {fileID: 8300000, guid: 4792ef0e002e64a8f8dbc38ae08c8166, type: 3}
-  - {fileID: 8300000, guid: e2306e20d12b3448d9e138cd78b97ef6, type: 3}
-  - {fileID: 8300000, guid: 988f7f0920d3e4010b7a50a4d997c1e1, type: 3}
-  - {fileID: 8300000, guid: 576be5cb5d0d6494c845964baec6fb40, type: 3}
-  - {fileID: 8300000, guid: 0696fa8b758a34077a231609c029da77, type: 3}
+  - {fileID: 8300000, guid: 2af217baba3864ae2ab75ba33ce4ea83, type: 3}
+  - {fileID: 8300000, guid: 2c27564b0bf8c4a3081a51c877835ac1, type: 3}
+  - {fileID: 8300000, guid: 72c56e6486c4c4acb85c2f65dcd71012, type: 3}
+  - {fileID: 8300000, guid: 111a77f9762434290b602be2f853dfad, type: 3}
+  - {fileID: 8300000, guid: 9dc5c9cf12314462ba5e9e123a1ef7d0, type: 3}
+  - {fileID: 8300000, guid: 7329fa839f9b94258b1f1bd6597be158, type: 3}
+  explosionSound: {fileID: 8300000, guid: 7c3306b8d98cb4565b2f286a11cd5589, type: 3}
 --- !u!82 &6396498521005000189
 AudioSource:
   m_ObjectHideFlags: 0

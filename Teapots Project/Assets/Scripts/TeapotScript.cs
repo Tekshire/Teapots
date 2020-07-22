@@ -25,6 +25,7 @@ public class TeapotScript : MonoBehaviour
 
     static float maxVel = 2.0f;
     public AudioClip[] crashSoundArray = new AudioClip[6];
+    public AudioClip explosionSound;
 
 
     // Start is called before the first frame update
@@ -118,15 +119,41 @@ public class TeapotScript : MonoBehaviour
 
 
     // No longer have trigger on teapot in order to enable bouncing off ship.
-    // Just enabled to see if we come here even when trigger is on charge.
+    // But still get here when hit by charge. Charge OnTriggerEnter used to
+    // destroy both charge and hit teapot. Now moved teapot destruction
+    // here to add animation and sound.
     private void OnTriggerEnter(Collider other)
     {
 #if (TRACE_COLLISIONS)
         Debug.Log("Teapot OnTriggerEnter: " + gameObject + " triggered by " + other.gameObject);
 #endif
+        // Right now only object with trigger is charge, so no need to check at this time.
+        // Only blow up teapot if it hits a charge.
+        // if (other.gameObject.tag == "Charge")
+        // {
+        // First do animation because light moves faster than sound.
+        // Call explosion animation.
+        // Explosion sound
+        Debug.Log("teapotAudio.PlayOneShot(explosionSound, 1.0f)");
+        teapotAudio.PlayOneShot(explosionSound);
+
+        // Plan to have explosion animation overwhelm teapot, so don't destroy until a bit later.
+        // (Use co-routine to do destruction later.)
+        //       Destroy(gameObject);
+        StartCoroutine(DelayDeath());
+        // }    // tag == "Charge"
     }
 
-    private void OnCollisionEnter(Collision collision)
+
+        
+IEnumerator DelayDeath()
+{
+    yield return new WaitForSeconds(2);
+    Destroy(gameObject);
+}
+
+
+private void OnCollisionEnter(Collision collision)
     {
 #if (TRACE_COLLISIONS)
         Debug.Log("Teapot OnCollisionEnter: " + gameObject + " collided with " + collision.gameObject);

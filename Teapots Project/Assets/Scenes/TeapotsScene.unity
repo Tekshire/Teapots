@@ -1296,32 +1296,37 @@ PrefabInstance:
         type: 3}
       propertyPath: crashSoundArray.Array.data[0]
       value: 
-      objectReference: {fileID: 8300000, guid: e2306e20d12b3448d9e138cd78b97ef6, type: 3}
+      objectReference: {fileID: 8300000, guid: ef0c15bda805041a7b88d8d3b18b8e27, type: 3}
     - target: {fileID: 3649331767197328803, guid: df989eb2c183b4b41801373150403873,
         type: 3}
       propertyPath: crashSoundArray.Array.data[1]
       value: 
-      objectReference: {fileID: 8300000, guid: 0696fa8b758a34077a231609c029da77, type: 3}
+      objectReference: {fileID: 8300000, guid: 988f7f0920d3e4010b7a50a4d997c1e1, type: 3}
     - target: {fileID: 3649331767197328803, guid: df989eb2c183b4b41801373150403873,
         type: 3}
       propertyPath: crashSoundArray.Array.data[2]
       value: 
-      objectReference: {fileID: 8300000, guid: 576be5cb5d0d6494c845964baec6fb40, type: 3}
+      objectReference: {fileID: 8300000, guid: e2306e20d12b3448d9e138cd78b97ef6, type: 3}
     - target: {fileID: 3649331767197328803, guid: df989eb2c183b4b41801373150403873,
         type: 3}
       propertyPath: crashSoundArray.Array.data[3]
       value: 
-      objectReference: {fileID: 8300000, guid: 988f7f0920d3e4010b7a50a4d997c1e1, type: 3}
+      objectReference: {fileID: 8300000, guid: 4792ef0e002e64a8f8dbc38ae08c8166, type: 3}
     - target: {fileID: 3649331767197328803, guid: df989eb2c183b4b41801373150403873,
         type: 3}
       propertyPath: crashSoundArray.Array.data[4]
       value: 
-      objectReference: {fileID: 8300000, guid: 4792ef0e002e64a8f8dbc38ae08c8166, type: 3}
+      objectReference: {fileID: 8300000, guid: 576be5cb5d0d6494c845964baec6fb40, type: 3}
     - target: {fileID: 3649331767197328803, guid: df989eb2c183b4b41801373150403873,
         type: 3}
       propertyPath: crashSoundArray.Array.data[5]
       value: 
-      objectReference: {fileID: 8300000, guid: ef0c15bda805041a7b88d8d3b18b8e27, type: 3}
+      objectReference: {fileID: 8300000, guid: 0696fa8b758a34077a231609c029da77, type: 3}
+    - target: {fileID: 3649331767197328803, guid: df989eb2c183b4b41801373150403873,
+        type: 3}
+      propertyPath: crashSoundIndex
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5840400238222320164, guid: df989eb2c183b4b41801373150403873,
         type: 3}
       propertyPath: m_Name

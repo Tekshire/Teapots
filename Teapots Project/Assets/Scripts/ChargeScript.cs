@@ -42,13 +42,8 @@ public class ChargeScript : MonoBehaviour
         // I only want to blow up teapots, so check for that.
         if (other.gameObject.tag == "Teapot")
         {
-#if (TRACE_COLLISIONS)
-            Debug.Log("Charge OnTriggerEnter: Destroys: " + other.gameObject);
-#endif
-            Destroy(other.gameObject);
-#if (TRACE_COLLISIONS)
-            Debug.Log("Thought if other object desstroyed, it could not later respond to trigger!");
-#endif
+            // Teapot destruction now happens in teapot script.
+            //Destroy(other.gameObject);
             Destroy(gameObject);
         }
     }
