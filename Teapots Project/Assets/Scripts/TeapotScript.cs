@@ -22,6 +22,7 @@ public class TeapotScript : MonoBehaviour
     private float timer = 0;
     private Renderer m_Renderer;
     public AudioSource teapotAudio;    // Made public so i can play with pitch modifier in inspector
+    public GameObject explosionPrefab;
 
     static float maxVel = 2.0f;
     public AudioClip[] crashSoundArray = new AudioClip[6];
@@ -133,14 +134,19 @@ public class TeapotScript : MonoBehaviour
         // {
         // First do animation because light moves faster than sound.
         // Call explosion animation.
+        GameObject explosionObject =
+        Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+        Destroy(gameObject);
+
         // Explosion sound
-        Debug.Log("teapotAudio.PlayOneShot(explosionSound, 1.0f)");
-        teapotAudio.PlayOneShot(explosionSound);
+        Debug.Log("explosionAudio.PlayOneShot(explosionSound, 1.0f)");
+        AudioSource explosionAudio = explosionObject.GetComponent<AudioSource>();
+        explosionAudio.PlayOneShot(explosionSound);
 
         // Plan to have explosion animation overwhelm teapot, so don't destroy until a bit later.
         // (Use co-routine to do destruction later.)
         //       Destroy(gameObject);
-        StartCoroutine(DelayDeath());
+     //   StartCoroutine(DelayDeath());
         // }    // tag == "Charge"
     }
 
@@ -148,7 +154,7 @@ public class TeapotScript : MonoBehaviour
         
 IEnumerator DelayDeath()
 {
-    yield return new WaitForSeconds(2);
+    yield return new WaitForSeconds(1.0f);
     Destroy(gameObject);
 }
 
