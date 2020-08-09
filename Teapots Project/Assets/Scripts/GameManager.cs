@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
     public int iTeapots;    // zero based 16 total
     public int iLevel;      // zero based 96 total
     public int iRange;      // iLevel % 16
+    public TextMeshProUGUI scoreText;
 
     // In Teapots, we know we only have 16 objects per level, so we can use an array.
     // When we begin to add in the Tempest objects, we can use the List recommended by
@@ -25,6 +27,7 @@ public class GameManager : MonoBehaviour
         iTeapots = 16;
         iLevel = 0;
         iRange = 0;
+        UpdateScore(0);
 
         if (bPlayingTag)
         {
@@ -43,4 +46,12 @@ public class GameManager : MonoBehaviour
     {
         
     }
+
+
+    public void UpdateScore(int scoreToAdd)
+    {
+        iScore += scoreToAdd;
+        scoreText.text = iScore.ToString();
+    }
+
 }

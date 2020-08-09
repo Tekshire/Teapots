@@ -20,23 +20,29 @@ public class TeapotScript : MonoBehaviour
     public bool doRotate = false;
 
     private float timer = 0;
-    private Renderer m_Renderer;
+    public GameManager gameManager; // change to private after we let inspector show we get value.
+    public Renderer m_Renderer;     // change to private
     public AudioSource teapotAudio;    // Made public so i can play with pitch modifier in inspector
     public GameObject explosionPrefab;
 
     static float maxVel = 2.0f;
     public AudioClip[] crashSoundArray = new AudioClip[6];
     public AudioClip explosionSound;
+    public int pointValue;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        //Fetch the Renderer component of the GameObject
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
+        //Fetch the Renderer component of the GameObject to change color
         m_Renderer = GetComponent<Renderer>();
         teapotAudio = GetComponent<AudioSource>();
 
         yOffset = transform.position.y;
+
+        pointValue = 1000;  // Depends upon game level
     }
 
 
@@ -134,25 +140,26 @@ public class TeapotScript : MonoBehaviour
         // {
         // First do animation because light moves faster than sound.
         // Call explosion animation.
-        GameObject explosionObject =
-        Instantiate(explosionPrefab, transform.position, Quaternion.identity);
         Destroy(gameObject);
+        GameObject explosionObject =
+            Instantiate(explosionPrefab, transform.position, Quaternion.identity);
 
         // Explosion sound
-        Debug.Log("explosionAudio.PlayOneShot(explosionSound, 1.0f)");
         AudioSource explosionAudio = explosionObject.GetComponent<AudioSource>();
         explosionAudio.PlayOneShot(explosionSound);
+
+        gameManager.UpdateScore(pointValue);
 
         // Plan to have explosion animation overwhelm teapot, so don't destroy until a bit later.
         // (Use co-routine to do destruction later.)
         //       Destroy(gameObject);
-     //   StartCoroutine(DelayDeath());
+        //   StartCoroutine(DelayDeath());
         // }    // tag == "Charge"
     }
 
 
-        
-IEnumerator DelayDeath()
+
+    IEnumerator DelayDeath()
 {
     yield return new WaitForSeconds(1.0f);
     Destroy(gameObject);
@@ -179,6 +186,7 @@ private void OnCollisionEnter(Collision collision)
 
         // Change teapot color only if hit by Player
         if (collision.gameObject.CompareTag("Player"))
+            // And only if playing tag.
         {
             m_Renderer.material.color = Color.white;
         }
