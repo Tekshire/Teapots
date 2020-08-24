@@ -10,10 +10,13 @@ public class ChargeScript : MonoBehaviour
     private const float maxShotDist = 40f;
     // Shot speed set as part of velocity at Charge instantiation in PlayerControl.
     public float shotSpeed;
+    public GameManager gameManager;
+
 
     void Start()
     {
-        
+        gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
+
     }
 
     void FixedUpdate()

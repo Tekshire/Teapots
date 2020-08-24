@@ -25,6 +25,7 @@ public class TeapotScript : MonoBehaviour
     public AudioSource teapotAudio;    // Made public so i can play with pitch modifier in inspector
     public GameObject explosionPrefab;
 
+
     static float maxVel = 2.0f;
     public AudioClip[] crashSoundArray = new AudioClip[6];
     public AudioClip explosionSound;
@@ -34,7 +35,7 @@ public class TeapotScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
 
         //Fetch the Renderer component of the GameObject to change color
         m_Renderer = GetComponent<Renderer>();
@@ -159,7 +160,7 @@ public class TeapotScript : MonoBehaviour
 
 
 
-    IEnumerator DelayDeath()
+IEnumerator DelayDeath()
 {
     yield return new WaitForSeconds(1.0f);
     Destroy(gameObject);
@@ -184,14 +185,23 @@ private void OnCollisionEnter(Collision collision)
             maxVel = collisionSpeed;
         teapotAudio.PlayOneShot(crashSoundArray[crashSoundIndex], collisionSpeed/maxVel);
 
-        // Change teapot color only if hit by Player
-        if (collision.gameObject.CompareTag("Player"))
-            // And only if playing tag.
+        if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
         {
-            m_Renderer.material.color = Color.white;
-        }
+            // Change teapot color only if hit by Player
+            if (collision.gameObject.CompareTag("Player"))
+            // And only if playing tag.
+            {
+                m_Renderer.material.color = Color.white;
+            }
+        }   // isGameActive
     }
 
+
+    // Called by game manager to count tagged teapots.
+    public bool isWhite()
+    {
+        return m_Renderer.material.color == Color.white;
+    }
 
 }
 

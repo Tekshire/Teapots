@@ -28,6 +28,7 @@ public class PlayerController : MonoBehaviour
     public Rigidbody rb;
     public AudioSource playerAudioSource;
     public AudioClip shotSound;
+    public GameManager gameManager; // change to private after we let inspector show we get value.
 
 
 #if (DEBUG_ANGLE_Y)
@@ -41,6 +42,8 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
+
         rb = GetComponent<Rigidbody>();
         playerAudioSource = GetComponent<AudioSource>();
 
@@ -68,12 +71,12 @@ public class PlayerController : MonoBehaviour
 
 void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
     {
-        // If we change rotation on both horizontal and vertical axis, the result can be a 45 degree angle bank.
-        // If we want the ship to stay level in scene, Try the rotations separately.
+            // If we change rotation on both horizontal and vertical axis, the result can be a 45 degree angle bank.
+            // If we want the ship to stay level in scene, Try the rotations separately.
 
-        /* 1. Change horizontal rotation Y; Allow 360 degree */
-        // Allow 360 degree settings
-        bool bChangeTorqueY = false;
+            /* 1. Change horizontal rotation Y; Allow 360 degree */
+            // Allow 360 degree settings
+            bool bChangeTorqueY = false;
         Vector3 torque = Vector3.zero;      // Torque to be added.
 
         // yaw:
@@ -133,18 +136,22 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         bool bChangeTorqueX = false;
         torque = Vector3.zero;
 
-        // pitch:
-        verticalRawInput = Input.GetAxisRaw("Vertical");
-        if (Input.GetKeyDown(KeyCode.W) || verticalRawInput == 1)
+        if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
         {
-            torque.x -= raiseSpeed;
-            bChangeTorqueX = true;
-        }
-        if (Input.GetKeyDown(KeyCode.S) || verticalRawInput == -1)
-        {
-            torque.x += raiseSpeed;
-            bChangeTorqueX = true;
-        }
+                // pitch:
+            verticalRawInput = Input.GetAxisRaw("Vertical");
+            if (Input.GetKeyDown(KeyCode.W) || verticalRawInput == 1)
+            {
+                torque.x -= raiseSpeed;
+                bChangeTorqueX = true;
+            }
+            if (Input.GetKeyDown(KeyCode.S) || verticalRawInput == -1)
+            {
+                torque.x += raiseSpeed;
+                bChangeTorqueX = true;
+            }
+        }   // isGameActive
+
         if (bChangeTorqueX)
         {
 #if (DEBUG_ANGLE_X || TEST_BACK_FLIP)
@@ -334,21 +341,25 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         /* 4. Forward speed */
         // Forward speed
         bool bChangeSpeed = false;
-        // No arrow keys to affect forward speed at this time.
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
         {
-            shipSpeed += shipSpeedStep;
-            if (shipSpeed > shipSpeedMax)
-                shipSpeed = shipSpeedMax;
-            bChangeSpeed = true;
-        }
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            shipSpeed -= shipSpeedStep;
-            if (shipSpeed < 0)
-                shipSpeed = 0;
-            bChangeSpeed = true;
-        }
+            // No arrow keys to affect forward speed at this time.
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                shipSpeed += shipSpeedStep;
+                if (shipSpeed > shipSpeedMax)
+                    shipSpeed = shipSpeedMax;
+                bChangeSpeed = true;
+            }
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                shipSpeed -= shipSpeedStep;
+                if (shipSpeed < 0)
+                    shipSpeed = 0;
+                bChangeSpeed = true;
+            }
+        }   // isGameActive
+
         if (bChangeSpeed)
         {
             // rb.AddRelativeForce((Vector3.forward * deltaMouseX).normalized, ForceMode.VelocityChange);
@@ -427,18 +438,21 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
     // assuming the same logic may apply to the shot vector.)
     void LateUpdate()
     {
-        // Check for charge fired after ship move, so charge move will match ship move.
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
         {
-            // launch projectile
-            ///GameObject sgo = Instantiate(chargePrefab, transform.position, chargePrefab.transform.rotation);
-            GameObject sgo = Instantiate(chargePrefab, transform.position, transform.rotation);
-            // Make sure the shot is going the way the ship is pointing.
-            Rigidbody srb = sgo.GetComponent<Rigidbody>();
-            srb.velocity = transform.forward * shotSpeed;
-            // Eventually check for sound
-            playerAudioSource.PlayOneShot(shotSound, 1.0f);
-        }
+            // Check for charge fired after ship move, so charge move will match ship move.
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                // launch projectile
+                ///GameObject sgo = Instantiate(chargePrefab, transform.position, chargePrefab.transform.rotation);
+                GameObject sgo = Instantiate(chargePrefab, transform.position, transform.rotation);
+                // Make sure the shot is going the way the ship is pointing.
+                Rigidbody srb = sgo.GetComponent<Rigidbody>();
+                srb.velocity = transform.forward * shotSpeed;
+                // Eventually check for sound
+                playerAudioSource.PlayOneShot(shotSound, 1.0f);
+            }
+        }   // isGameActive
     }
 
 
@@ -448,6 +462,25 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         Debug.Log("Player OnCollisionEnter: " + gameObject + " collided with " + collision.gameObject);
 #endif
         // Just seeing if we come here at all.
+    }
+
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
+        {
+            // When we first fire a shot, when the charge is created, it is within the
+            // colllision area of our ship. So we trigger this as soon as we shoot.
+            // Check tag to avoid this situation.
+            if (other.CompareTag("Charge")) return;
+
+        // So far, there are only 2 ojects with triggers: charges and enemy charges.
+        // (I suppose later we may have flippers etc that may have triggers.)
+        // Player probably does not move fast enough to catch up to any of its own charges,
+        // so any trigger enter must be for enemycharge. But maybe check tag just to be sure
+        gameManager.UpdateLives(-1);
+        }   // isGameActive
+
     }
 
 
