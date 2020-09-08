@@ -74,25 +74,28 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
             // If we change rotation on both horizontal and vertical axis, the result can be a 45 degree angle bank.
             // If we want the ship to stay level in scene, Try the rotations separately.
 
-            /* 1. Change horizontal rotation Y; Allow 360 degree */
-            // Allow 360 degree settings
-            bool bChangeTorqueY = false;
+        /* 1. Change horizontal rotation Y; Allow 360 degree */
+        // Allow 360 degree settings
+        bool bChangeTorqueY = false;
         Vector3 torque = Vector3.zero;      // Torque to be added.
 
-        // yaw:
-        // Using the RAW axis returns hard coded +1 or -1. (Doesn't seem so RAW to me.)
-        horizontalRawInput = Input.GetAxisRaw("Horizontal");
-        if (Input.GetKeyDown(KeyCode.D) || horizontalRawInput == 1)
+        if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
         {
-            torque.y += turnSpeed;
-            //torque.z += turnSpeed;  // Try Bob's idea in tekshire.com/teapotroll
-            bChangeTorqueY = true;
-        }
-        if (Input.GetKeyDown(KeyCode.A) || horizontalRawInput == -1)
-        {
-            torque.y -= turnSpeed;
-            //torque.z -= turnSpeed;  // Try Bob's idea in tekshire.com/teapotroll
-            bChangeTorqueY = true;
+            // yaw:
+            // Using the RAW axis returns hard coded +1 or -1. (Doesn't seem so RAW to me.)
+            horizontalRawInput = Input.GetAxisRaw("Horizontal");
+            if (Input.GetKeyDown(KeyCode.D) || horizontalRawInput == 1)
+            {
+                torque.y += turnSpeed;
+                //torque.z += turnSpeed;  // Try Bob's idea in tekshire.com/teapotroll
+                bChangeTorqueY = true;
+            }
+            if (Input.GetKeyDown(KeyCode.A) || horizontalRawInput == -1)
+            {
+                torque.y -= turnSpeed;
+                //torque.z -= turnSpeed;  // Try Bob's idea in tekshire.com/teapotroll
+                bChangeTorqueY = true;
+            }
         }
         if (bChangeTorqueY)
         {

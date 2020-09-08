@@ -21,28 +21,54 @@ public class GameManager : MonoBehaviour
     public int iTotalLives; // To calculate granting new life. (Includes lives you've lost)
     public int iScore;      // score for Teapot Blaster
     public int iTimer;      // score for Teapot Tag
-    public int iTeapots;    // zero based 16 total
+    public int iTeapots;    // zero based 16 total / level
     public int iLevel;      // zero based 96 total
     public int iRange;      // iLevel % 16
     public int scorePerTeapot;
+    public TextMeshProUGUI teapotsGameText; // Tag or Blaster?
     public TextMeshProUGUI livesText;
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI hiScoreText;
     public TextMeshProUGUI loScoreText;
-    public TextMeshProUGUI teapotsText;
+    public TextMeshProUGUI teapotsLeftText;
     public TextMeshProUGUI gameOverText;
+    public TextMeshProUGUI teapotsTitleText;
+
+    public Button startButton;
     public Button restartButton;
 
     public GameObject teapotPrefab;
-    public GameObject[] teapots = new GameObject[16];
 
     // In Teapots, we know we only have 16 objects per level, so we can use an array.
     // When we begin to add in the Tempest objects, we can use the List recommended by
     // Unity in the Code Live Tutorials, Week 6, session 1.
+    public GameObject[] teapots = new GameObject[16];
+
+
+    // This did not work! Awake is called each time we do a ReloadScene.
+    // Idea: Make 2 scenes. 2nd is duplicate of 1st, but with no StartButton
+    // or GameName. When game starts, first scene is loaded. On ReloadScene
+    // we call second scene. In Script, Start checks name of active scene and
+    // sets isActive false for 1st, but true for 2nd.
+    public bool awakeTest;
+    void Awake()
+    {
+        Debug.Log("Calling Awake");
+        awakeTest = true;
+    }
+
+
     void Start()
     {
+        Debug.Log("Calling Start; awakeTest = " + awakeTest);
+        awakeTest = false;
+
+        bGameOver = false;
+        isGameActive = false;       // Not until Start button pressed
         gameOverText.gameObject.SetActive(false);
-        isGameActive = true;
+        restartButton.gameObject.SetActive(false);
+        teapotsTitleText.gameObject.SetActive(true);
+        startButton.gameObject.SetActive(true);
 
         // Stuff that is the same for each level
         iScore = 0;
@@ -68,8 +94,12 @@ public class GameManager : MonoBehaviour
         UpdateLoScore(10101);
         UpdateTeapotsDisplay();
 
-        // startNewLevel(iLevel);
+        StartNewLevel(iLevel);
+    }
 
+
+    public void StartNewLevel(int level)
+    {
         // Create new teapots for this level
         for (int i = 0; i < teapots.Length; i++)
         {
@@ -77,6 +107,45 @@ public class GameManager : MonoBehaviour
             teapots[i] = Instantiate(teapotPrefab, startVector, Quaternion.identity);
         }
     }
+
+
+    public void StartGame()
+    {
+        Debug.Log("StartGame button pushed.");
+        teapotsTitleText.gameObject.SetActive(false);
+        startButton.gameObject.SetActive(false);
+        bGameOver = false;
+        isGameActive = true;
+    }
+
+
+    public void GameOver()
+    {
+        bGameOver = true;
+        isGameActive = false;
+        gameOverText.gameObject.SetActive(true);
+        restartButton.gameObject.SetActive(true);
+        // Normally we would check to see if this is a new high score,
+        // but for testing just go ahead and update it.
+        UpdateHiScore(iScore);
+        // Nope, Start overwrites the hi score.
+    }
+
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        // Don't need to set gameOverText or restartButton back to inActive
+        // because that is the normal state that reloading the scene will restore.
+
+        //// Just hit Restart button, so no need to immediately also hit Start Button.
+        //// Call StartGame to dismiss Start button
+        //StartGame();
+        // LoadScene may not execute until next frame, at which time, it will
+        // overwrite the variables we just called StartGame to set.
+        Debug.Log("Calling Restart; awakeTest = " + awakeTest);
+    }
+
 
     // Update is called once per frame
     // Other objects call FixedUpdate() for physics,
@@ -180,24 +249,8 @@ public class GameManager : MonoBehaviour
     public void UpdateTeapotsDisplay()
     {
         // Number of teapots calculated each frame; just display count.
-        teapotsText.text = iTeapots.ToString();
+        teapotsLeftText.text = iTeapots.ToString();
         // When teapots gets to 0, go to next level.
-    }
-
-
-    public void GameOver()
-    {
-        isGameActive = false;
-        gameOverText.gameObject.SetActive(true);
-        restartButton.gameObject.SetActive(true);
-
-    }
-
-    public void RestartGame()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        // Don't need to set gameOverText or restartButton back to inActive
-        // because that is the normal state that reloading the scene will restore.
     }
 
 
