@@ -30,6 +30,7 @@ public class TeapotScript : MonoBehaviour
     public AudioClip[] crashSoundArray = new AudioClip[6];
     public AudioClip explosionSound;
     public int pointValue;
+    public bool isTagged = false;
 
 
     // Start is called before the first frame update
@@ -185,13 +186,16 @@ private void OnCollisionEnter(Collision collision)
             maxVel = collisionSpeed;
         teapotAudio.PlayOneShot(crashSoundArray[crashSoundIndex], collisionSpeed/maxVel);
 
+        // ToDo: collision sound should also be dependent upon if we are playing game or not.
         if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
         {
             // Change teapot color only if hit by Player
-            if (collision.gameObject.CompareTag("Player"))
+            // AND ONLY IF WE'RE PLAYING TAG. (Collision noise is OK though.)
+            if (collision.gameObject.CompareTag("Player") && gameManager.bPlayingTag)
             // And only if playing tag.
             {
                 m_Renderer.material.color = Color.white;
+                isTagged = true;
             }
         }   // isGameActive
     }

@@ -34,8 +34,12 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI gameOverText;
     public TextMeshProUGUI teapotsTitleText;
 
-    public Button startButton;
+    public Button tagStartButton;
+    public Button blasterStartButton;
     public Button restartButton;
+    public GameObject scoreElement;
+    public GameObject loScoreElement;
+    public GameObject hiScoreElement;
 
     public GameObject teapotPrefab;
 
@@ -45,30 +49,15 @@ public class GameManager : MonoBehaviour
     public GameObject[] teapots = new GameObject[16];
 
 
-    // This did not work! Awake is called each time we do a ReloadScene.
-    // Idea: Make 2 scenes. 2nd is duplicate of 1st, but with no StartButton
-    // or GameName. When game starts, first scene is loaded. On ReloadScene
-    // we call second scene. In Script, Start checks name of active scene and
-    // sets isActive false for 1st, but true for 2nd.
-    public bool awakeTest;
-    void Awake()
-    {
-        Debug.Log("Calling Awake");
-        awakeTest = true;
-    }
-
-
     void Start()
     {
-        Debug.Log("Calling Start; awakeTest = " + awakeTest);
-        awakeTest = false;
-
         bGameOver = false;
         isGameActive = false;       // Not until Start button pressed
         gameOverText.gameObject.SetActive(false);
         restartButton.gameObject.SetActive(false);
         teapotsTitleText.gameObject.SetActive(true);
-        startButton.gameObject.SetActive(true);
+        tagStartButton.gameObject.SetActive(true);
+        blasterStartButton.gameObject.SetActive(true);
 
         // Stuff that is the same for each level
         iScore = 0;
@@ -81,11 +70,13 @@ public class GameManager : MonoBehaviour
         {
             iLives = 1;
             scorePerTeapot = 0; // We don't destroy any teapots in tag
+            bPlayingTag = true;
         }
         else
         {
             iLives = 3;
             scorePerTeapot = 1000 + (500 * iRange);
+            bPlayingTag = false;
         }
         iTotalLives = iLives;
         UpdateLives(0);
@@ -109,11 +100,49 @@ public class GameManager : MonoBehaviour
     }
 
 
+    public void StartTagGame()
+    {
+        Debug.Log("StartTagGame.bPlayingTag = " + bPlayingTag);
+        iLives = 1;
+        scorePerTeapot = 0; // We don't destroy any teapots in tag
+        bPlayingTag = true;
+        teapotsGameText.SetText("Teapots Tag");
+        loScoreElement.SetActive(true);
+        hiScoreElement.SetActive(false);
+        StartGame();
+    }
+
+
+    public void StartBlasterGame()
+    {
+        Debug.Log("StartBlasterGame.bPlayingTag = " + bPlayingTag);
+        iLives = 3;
+        scorePerTeapot = 1000 + (500 * iRange);
+        bPlayingTag = false;
+        //teapotsGameText.SetText("Teapots Blaster");   // Already set by LoadScene
+        loScoreElement.SetActive(false);
+        hiScoreElement.SetActive(true);
+        StartGame();
+    }
+
+
+    // Teapot Tag and Teapot Blaster use the same game logic with just a few
+    // parameters different between the two games. StartTagGame() and StartBlasterGame()
+    // will set up the parameters that are different beteween the game versions.
+    // StartGame() then do all the work to get the game playing.
     public void StartGame()
     {
-        Debug.Log("StartGame button pushed.");
         teapotsTitleText.gameObject.SetActive(false);
-        startButton.gameObject.SetActive(false);
+        tagStartButton.gameObject.SetActive(false);
+        blasterStartButton.gameObject.SetActive(false);
+
+        iTotalLives = iLives;
+        UpdateLives(0);
+        UpdateScore(0);
+        UpdateHiScore(10101);
+        UpdateLoScore(10101);
+        UpdateTeapotsDisplay();
+
         bGameOver = false;
         isGameActive = true;
     }
@@ -143,7 +172,6 @@ public class GameManager : MonoBehaviour
         //StartGame();
         // LoadScene may not execute until next frame, at which time, it will
         // overwrite the variables we just called StartGame to set.
-        Debug.Log("Calling Restart; awakeTest = " + awakeTest);
     }
 
 
@@ -182,13 +210,10 @@ public class GameManager : MonoBehaviour
         {
             if (tp == null) continue;
 
-            // Also check for non-white teapots.
-            ///GameObject playerGameObj = GameObject.Find("player");
-            ///if (playerGameObj != null)
-            ///{
-            ///    playerVar = playerGameObj.GetComponent<player>();
-            ///}
-            ///if (tp.IsWhite()) continue;
+            // Also check for non-white (!tagged) teapots.
+            TeapotScript tpScript = tp.GetComponent<TeapotScript>();
+            if (tpScript == null) continue;
+            if (tpScript.isTagged) continue;
 
             remainingTeapots++;
         }   

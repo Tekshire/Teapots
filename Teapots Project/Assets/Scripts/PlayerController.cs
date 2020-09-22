@@ -441,7 +441,8 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
     // assuming the same logic may apply to the shot vector.)
     void LateUpdate()
     {
-        if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
+        // No input, spawning, or scoring if game not active.
+        if (gameManager.isGameActive && !gameManager.bPlayingTag)
         {
             // Check for charge fired after ship move, so charge move will match ship move.
             if (Input.GetKeyDown(KeyCode.Space))
