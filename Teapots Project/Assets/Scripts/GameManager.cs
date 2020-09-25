@@ -20,10 +20,11 @@ public class GameManager : MonoBehaviour
     public int iLives;      // Current lives; 0 => new game
     public int iTotalLives; // To calculate granting new life. (Includes lives you've lost)
     public int iScore;      // score for Teapot Blaster
+    public int iHiScore;    // High score for Teapot Blaster
+    public int iLoScore;    // Low score for Teapot Tag
     public int iTimer;      // score for Teapot Tag
     public int iTeapots;    // zero based 16 total / level
-    public int iLevel;      // zero based 96 total
-    public int iRange;      // iLevel % 16
+    public int iLevel;      // tube number % 16 (0-5 regular; 6 -> tubenum > 96)
     public int scorePerTeapot;
     public TextMeshProUGUI teapotsGameText; // Tag or Blaster?
     public TextMeshProUGUI livesText;
@@ -32,6 +33,7 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI loScoreText;
     public TextMeshProUGUI teapotsLeftText;
     public TextMeshProUGUI gameOverText;
+    public TextMeshProUGUI winnerText;
     public TextMeshProUGUI teapotsTitleText;
 
     public Button tagStartButton;
@@ -63,66 +65,93 @@ public class GameManager : MonoBehaviour
         iScore = 0;
         iTimer = 0;
         iTeapots = 16;
-        iLevel = 0;
-        iRange = 0;
 
-        if (bPlayingTag)
-        {
-            iLives = 1;
-            scorePerTeapot = 0; // We don't destroy any teapots in tag
-            bPlayingTag = true;
-        }
-        else
-        {
-            iLives = 3;
-            scorePerTeapot = 1000 + (500 * iRange);
-            bPlayingTag = false;
-        }
-        iTotalLives = iLives;
         UpdateLives(0);
         UpdateScore(0);
-        UpdateHiScore(10101);
-        UpdateLoScore(10101);
         UpdateTeapotsDisplay();
 
+        // Stuff we should update from app memory
+        //iHiScore
+        //iLoScore
+        //UpdateHiScore(iHiScore);
+        //UpdateLoScore(iLoScore);
+
+        iLevel = 0;
         StartNewLevel(iLevel);
     }
 
 
     public void StartNewLevel(int level)
     {
+        Color levelColor;
+        switch (level)
+        {
+            case 0:
+                levelColor = Color.blue;
+                break;
+            case 1:
+                levelColor = Color.red;
+                break;
+            case 2:
+                levelColor = Color.yellow;
+                break;
+            case 3:
+                levelColor = Color.cyan;
+                break;
+            case 4:
+                levelColor = Color.black;
+                break;
+            default:        // Default color for tubnum > 96
+                // Want darker green than Color.green
+                levelColor = new Color(0f, 100f / 255f, 0f, 1.0f);
+                break;
+        }
+
+        // Not all GameObjects from previous levels have been destroyed. (Think rammed
+        // teapots that haven't yet left the playing field.) Free them up.
+        foreach (GameObject tp in teapots)
+        {
+            if (tp != null) Destroy(tp); ;
+        }
+
         // Create new teapots for this level
         for (int i = 0; i < teapots.Length; i++)
         {
-            Vector3 startVector = startLocations[i];
-            teapots[i] = Instantiate(teapotPrefab, startVector, Quaternion.identity);
+            Vector3 startVector = startLocations[i] * (1.0f + (level / 5.0f));
+            GameObject teapot = Instantiate(teapotPrefab, startVector, Quaternion.identity);
+            teapots[i] = teapot;
+            TeapotScript script = teapot.GetComponent<TeapotScript>();
+            Renderer render = teapot.GetComponent<Renderer>();
+            script.m_Renderer = render;
+            render.material.color = levelColor;
         }
     }
 
 
     public void StartTagGame()
     {
-        Debug.Log("StartTagGame.bPlayingTag = " + bPlayingTag);
-        iLives = 1;
+        iTotalLives = iLives = 1;
         scorePerTeapot = 0; // We don't destroy any teapots in tag
         bPlayingTag = true;
         teapotsGameText.SetText("Teapots Tag");
         loScoreElement.SetActive(true);
         hiScoreElement.SetActive(false);
-        StartGame();
+        scorePerTeapot = 0; // We don't destroy any teapots in tag
+
+        StartPlay();
     }
 
 
     public void StartBlasterGame()
     {
-        Debug.Log("StartBlasterGame.bPlayingTag = " + bPlayingTag);
-        iLives = 3;
-        scorePerTeapot = 1000 + (500 * iRange);
-        bPlayingTag = false;
+        iTotalLives = iLives = 3;
+        //bPlayingTag = false;                          // Already set by LoadScene
         //teapotsGameText.SetText("Teapots Blaster");   // Already set by LoadScene
         loScoreElement.SetActive(false);
         hiScoreElement.SetActive(true);
-        StartGame();
+        scorePerTeapot = 1000 + (500 * iLevel);
+
+        StartPlay();
     }
 
 
@@ -130,18 +159,18 @@ public class GameManager : MonoBehaviour
     // parameters different between the two games. StartTagGame() and StartBlasterGame()
     // will set up the parameters that are different beteween the game versions.
     // StartGame() then do all the work to get the game playing.
-    public void StartGame()
+    public void StartPlay()
     {
+        // ToDo: Some of these have already been done in Start() etc.
+        UpdateLives(iLives);
+        UpdateScore(iScore);
+        UpdateHiScore(iHiScore);
+        UpdateLoScore(iLoScore);
+        UpdateTeapotsDisplay();
+
         teapotsTitleText.gameObject.SetActive(false);
         tagStartButton.gameObject.SetActive(false);
         blasterStartButton.gameObject.SetActive(false);
-
-        iTotalLives = iLives;
-        UpdateLives(0);
-        UpdateScore(0);
-        UpdateHiScore(10101);
-        UpdateLoScore(10101);
-        UpdateTeapotsDisplay();
 
         bGameOver = false;
         isGameActive = true;
@@ -152,12 +181,32 @@ public class GameManager : MonoBehaviour
     {
         bGameOver = true;
         isGameActive = false;
-        gameOverText.gameObject.SetActive(true);
+        if (iLives > 0)
+            winnerText.gameObject.SetActive(true);
+        else
+            gameOverText.gameObject.SetActive(true);
         restartButton.gameObject.SetActive(true);
-        // Normally we would check to see if this is a new high score,
-        // but for testing just go ahead and update it.
-        UpdateHiScore(iScore);
-        // Nope, Start overwrites the hi score.
+        // Check to see if this is a new high score,
+        if (bPlayingTag)
+        {
+            if (iTimer < iLoScore)
+            {
+                iLoScore = iTimer;
+                UpdateLoScore(iLoScore);
+                // ToDo: Save in app memory so Start() can retrieve it.
+            }
+
+        }
+        else    // Playing blasster
+        {
+            if (iScore > iHiScore)
+            {
+                iHiScore = iScore;
+                UpdateHiScore(iHiScore);
+                // ToDo: Save in app memory so Start() can retrieve it.
+            }
+        }
+        // Note, Start overwrites the hi and lo scores.
     }
 
 
@@ -220,10 +269,22 @@ public class GameManager : MonoBehaviour
 
         if (remainingTeapots != iTeapots)
         {
-        iTeapots = remainingTeapots;
-        UpdateTeapotsDisplay();
-
+            iTeapots = remainingTeapots;
+            UpdateTeapotsDisplay();
+        }
         // If teapots down to 0, go to next level.
+        if (iTeapots == 0)
+        {
+            if (iLevel < 5)
+            {
+                iLevel++;       // Will do up to level 5.
+                StartNewLevel(iLevel);
+            }
+            else
+            {
+                // Really should say Game Winner!
+                GameOver();
+            }
         }
     }
 
@@ -243,16 +304,16 @@ public class GameManager : MonoBehaviour
 
 
     // Update hi score only happens at end of game, so just display score.
-    public void UpdateHiScore(int scoreToAdd)
+    public void UpdateHiScore(int newHiScore)
     {
-        hiScoreText.text = scoreToAdd.ToString();
+        hiScoreText.text = newHiScore.ToString();
     }
 
 
     // Update lo score only happens at end of game, so just display score.
-    public void UpdateLoScore(int scoreToAdd)
+    public void UpdateLoScore(int newLoScore)
     {
-        loScoreText.text = scoreToAdd.ToString();
+        loScoreText.text = newLoScore.ToString();
     }
 
 

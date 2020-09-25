@@ -13,6 +13,8 @@ using UnityEngine;
 // In Tempest, player controls a ship!
 public class PlayerController : MonoBehaviour
 {
+    private const int MAX_GYRO_DELAY = 20;  // ABOUT 1/3 SEC
+
     private float horizontalRawInput, verticalRawInput;
     public float turnSpeed;     // Radians / sec
     public float raiseSpeed;    // Radians / sec
@@ -25,6 +27,8 @@ public class PlayerController : MonoBehaviour
     ///    public float startMouseX;
     ///    public float deltaMouseX;
     public GameObject chargePrefab;
+    public int gyroDelay = MAX_GYRO_DELAY;
+
     public Rigidbody rb;
     public AudioSource playerAudioSource;
     public AudioClip shotSound;
@@ -102,6 +106,8 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
 #if (DEBUG_ANGLE_Y)
             Debug.Log("Change rotate y by torque: " + torque);
 #endif
+            gyroDelay = MAX_GYRO_DELAY;
+
             // For rotation, we could just use transform change rotation, but want
             // to use AddTorque so that angular drag can have an effect.
             rb.AddRelativeTorque(torque, ForceMode.Force);
@@ -160,6 +166,8 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
 #if (DEBUG_ANGLE_X || TEST_BACK_FLIP)
             Debug.Log("Change pitch x by torque: " + torque);
 #endif
+            gyroDelay = MAX_GYRO_DELAY;
+
             // For rotation, we could just use transform change rotation, but want
             // to use AddTorque so that angular drag can have an effect.
             rb.AddRelativeTorque(torque, ForceMode.Force);
@@ -266,72 +274,80 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
         // changing the other 2 axis. Bring the roll back to 0 degrees off the z axis.
         if (!bChangeTorqueX && !bChangeTorqueY)
         {
+            // Also don't start the gyroscope right away if we have just sent steering commands.
+            // Let them play out.
+            //public int gyroDelay = MAX_GYRO_DELAY;
+            gyroDelay--;
+            if (gyroDelay < 0)
+            {
 #if (TEST_GYROSCOPE)
             // Begin by seeing what vector we are flying at.
             Debug.Log("----- Leveling up from: " + transform.eulerAngles);
 #endif
-            float checkAndleZ = transform.eulerAngles.z % 360f;
+                float checkAndleZ = transform.eulerAngles.z % 360f;
 #if (TEST_GYROSCOPE)
             Debug.Log("Starting with Z angle: " + checkAndleZ);
 #endif
-            if (!Mathf.Approximately(checkAndleZ, 0.0f))
+                if (!Mathf.Approximately(checkAndleZ, 0.0f))
                 {
 #if (TEST_GYROSCOPE)
                     Debug.Log("Not approximately 0: " + checkAndleZ);
 #endif
-                // If not already level, we know we will be making a change.
+                    // If not already level, we know we will be making a change.
 
-                // If angle > 180, it means it is on the other side of the circle;
-                // reverse the angle for easier comparison.
-                if (checkAndleZ > 180f)
-                {
-                    checkAndleZ -= 360f;    // Display as negative angle
+                    // If angle > 180, it means it is on the other side of the circle;
+                    // reverse the angle for easier comparison.
+        // ToDo: Use while instead of if
+                    if (checkAndleZ > 180f)
+                    {
+                        checkAndleZ -= 360f;    // Display as negative angle
 #if (TEST_GYROSCOPE)
                     Debug.Log("checkAndleZ > 180f: " + checkAndleZ);
 #endif
-                }
-                else if (checkAndleZ < -180f)
-                {
-                    checkAndleZ += 360f;    // Display as positive angle
+                    }
+                    else if (checkAndleZ < -180f)
+                    {
+                        checkAndleZ += 360f;    // Display as positive angle
 #if (TEST_GYROSCOPE)
                     Debug.Log("checkAndleZ < -180f: " + checkAndleZ);
 #endif
-                }
-                // Now see if angle exceeds -levelSpeed to levelSpeed degrees.
-                if (checkAndleZ > levelSpeed)
-                {
-                    checkAndleZ -= levelSpeed;
+                    }
+                    // Now see if angle exceeds -levelSpeed to levelSpeed degrees.
+                    if (checkAndleZ > levelSpeed)
+                    {
+                        checkAndleZ -= levelSpeed;
 #if (TEST_GYROSCOPE)
                     Debug.Log("checkAndleZ > levelSpeed: " + checkAndleZ);
 #endif
-                }
-                else if (checkAndleZ < -levelSpeed)
-                {
-                    checkAndleZ += levelSpeed;
+                    }
+                    else if (checkAndleZ < -levelSpeed)
+                    {
+                        checkAndleZ += levelSpeed;
 #if (TEST_GYROSCOPE)
                     Debug.Log("checkAndleZ < -levelSpeed: " + checkAndleZ);
 #endif
-                }
-                else
-                {
-                    checkAndleZ = 0.0f;
+                    }
+                    else
+                    {
+                        checkAndleZ = 0.0f;
 #if (TEST_GYROSCOPE)
                     Debug.Log("else: " + checkAndleZ);
 #endif
-                }
+                    }
 #if (TEST_GYROSCOPE)
                 Debug.Log("New Z angle: " + checkAndleZ);
 #endif
-            // Convert new angles (well, x) to quaternion
-            float origAngleX = transform.eulerAngles.x % 360f;
-            float origAngleY = transform.eulerAngles.y % 360f;
-            //float origAngleX = transform.eulerAngles.x;
-            //float origAngleY = transform.eulerAngles.y;
-            transform.eulerAngles = new Vector3(origAngleX, origAngleY, checkAndleZ);
+                    // Convert new angles (well, x) to quaternion
+                    float origAngleX = transform.eulerAngles.x % 360f;
+                    float origAngleY = transform.eulerAngles.y % 360f;
+                    //float origAngleX = transform.eulerAngles.x;
+                    //float origAngleY = transform.eulerAngles.y;
+                    transform.eulerAngles = new Vector3(origAngleX, origAngleY, checkAndleZ);
 #if (TEST_GYROSCOPE)
             Debug.Log("transform.eulerAngles: " + transform.eulerAngles);
 #endif
-            }
+                }
+        }
         }
         /* Close 3. Level Ship */
 
@@ -453,6 +469,10 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
                 // Make sure the shot is going the way the ship is pointing.
                 Rigidbody srb = sgo.GetComponent<Rigidbody>();
                 srb.velocity = transform.forward * shotSpeed;
+
+                // Get lower score if you just blast away. (Not part of regular Tempest.)
+                gameManager.UpdateScore(-1);
+
                 // Eventually check for sound
                 playerAudioSource.PlayOneShot(shotSound, 1.0f);
             }

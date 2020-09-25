@@ -201,11 +201,5 @@ private void OnCollisionEnter(Collision collision)
     }
 
 
-    // Called by game manager to count tagged teapots.
-    public bool isWhite()
-    {
-        return m_Renderer.material.color == Color.white;
-    }
-
 }
 
