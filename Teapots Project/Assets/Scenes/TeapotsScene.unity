@@ -1760,8 +1760,8 @@ MonoBehaviour:
   iLives: 1
   iTotalLives: 1
   iScore: 0
-  iHiScore: 0
-  iLoScore: 0
+  iHiScore: 10101
+  iLoScore: 10101
   iTimer: 0
   iTeapots: 0
   iLevel: 0

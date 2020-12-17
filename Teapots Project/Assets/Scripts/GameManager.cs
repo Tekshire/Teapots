@@ -8,6 +8,7 @@ using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+// ToDo: Add check for new life at UpdateScore().
 
 public class GameManager : MonoBehaviour
 {
@@ -162,10 +163,10 @@ public class GameManager : MonoBehaviour
     public void StartPlay()
     {
         // ToDo: Some of these have already been done in Start() etc.
-        UpdateLives(iLives);
+        SetLives(iLives);
         UpdateScore(iScore);
-        UpdateHiScore(iHiScore);
-        UpdateLoScore(iLoScore);
+        SetHiScore(iHiScore);
+        SetLoScore(iLoScore);
         UpdateTeapotsDisplay();
 
         teapotsTitleText.gameObject.SetActive(false);
@@ -192,7 +193,7 @@ public class GameManager : MonoBehaviour
             if (iTimer < iLoScore)
             {
                 iLoScore = iTimer;
-                UpdateLoScore(iLoScore);
+                SetLoScore(iLoScore);
                 // ToDo: Save in app memory so Start() can retrieve it.
             }
 
@@ -202,7 +203,7 @@ public class GameManager : MonoBehaviour
             if (iScore > iHiScore)
             {
                 iHiScore = iScore;
-                UpdateHiScore(iHiScore);
+                SetHiScore(iHiScore);
                 // ToDo: Save in app memory so Start() can retrieve it.
             }
         }
@@ -289,6 +290,13 @@ public class GameManager : MonoBehaviour
     }
 
 
+    public void SetScore(int newScore)
+    {
+        iScore += newScore;
+        scoreText.text = iScore.ToString();
+    }
+
+
     public void UpdateScore(int scoreToAdd)
     {
         if (bPlayingTag)
@@ -304,16 +312,28 @@ public class GameManager : MonoBehaviour
 
 
     // Update hi score only happens at end of game, so just display score.
-    public void UpdateHiScore(int newHiScore)
+    public void SetHiScore(int newHiScore)
     {
         hiScoreText.text = newHiScore.ToString();
     }
 
 
     // Update lo score only happens at end of game, so just display score.
-    public void UpdateLoScore(int newLoScore)
+    public void SetLoScore(int newLoScore)
     {
         loScoreText.text = newLoScore.ToString();
+    }
+
+
+    public void SetLives(int newLives)
+    {
+        iTotalLives = iLives = newLives;
+        livesText.text = iLives.ToString();
+        // Really don't expect to set lives to 0, but maybe as test?
+        if (iLives <= 0)
+        {
+            GameOver();
+        }
     }
 
 
