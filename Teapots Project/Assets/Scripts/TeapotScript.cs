@@ -1,5 +1,4 @@
 ﻿#define TRACE_COLLISIONS
-#undef TEST_SOUND
 
 using System.Collections;
 using System.Collections.Generic;
@@ -8,20 +7,9 @@ using UnityEngine;
 
 public class TeapotScript : MonoBehaviour
 {
-    // Most of this is set up when testing teapots motion when we first started.
-    // This has not been maintained!
-    public float xSpread = 10;
-    public float zSpread = 10;
-    public float yOffset;
-    //public Transform centerPoint;
-
-    public float rotSpeed = 2;
-    public bool rotateClockwise;
-    public bool doRotate = false;
-
     private float timer = 0;
-    public GameManager gameManager; // change to private after we let inspector show we get value.
-    public Renderer m_Renderer;     // change to private
+    private GameManager gameManager;
+    public Renderer m_Renderer;
     public AudioSource teapotAudio;    // Made public so i can play with pitch modifier in inspector
     public GameObject explosionPrefab;
 
@@ -31,6 +19,7 @@ public class TeapotScript : MonoBehaviour
     public AudioClip explosionSound;
     public int pointValue;
     public bool isTagged = false;
+    public Vector3 axis;
 
 
     // Start is called before the first frame update
@@ -42,87 +31,40 @@ public class TeapotScript : MonoBehaviour
         m_Renderer = GetComponent<Renderer>();
         teapotAudio = GetComponent<AudioSource>();
 
-        yOffset = transform.position.y;
-
         pointValue = 1000;  // Depends upon game level
     }
 
 
+    // Teapot movement uses force of gravity pulling down, while centripital
+    // force tends to keep teapot moving forward.
+    // Force of gravity:
+    //      F = G (m1 * m2) / r^2
+    // Programming:
+    /*
+    void Update() {
+      foreach (GameObject s in spheres) {
+        Vector3 difference = this.transform.position - s.transform.position;
+        float dist = difference.magnitude;
+        Vector3 gravityDirection = difference.normalized;
+        float gravity = 9.81f * (this.transform.localScale.x * s.transform.localScale.x
+            * 80) / (dist * dist);
+        Vector3 gravityVector = (gravityDirection * gravity);
+        s.transform.GetComponent<Rigidbody>().AddForce(gravityVector, ForceMode.Acceleration); }}
+    */
     void FixedUpdate()    // Don't need Time.deltaTime when using FixedUpdate.
     {
-        // Realign teapots so they all have different forward vectors.
-
-        // Test calculated rotation to see what happens when we have colllisions
-        if (doRotate)
+        if (gameManager.isGameActive)
         {
-            //timer += Time.deltaTime * rotSpeed;
-            timer += rotSpeed;
-            Rotate();
-        }
-
-#if (TEST_SOUND)
-        // Testing sounds by playing them based on key press
-        bool bPlaySound = false;
-        int crashSoundIndex = 0;
-
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            crashSoundIndex = 0;
-            bPlaySound = true;
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            crashSoundIndex = 1;
-            bPlaySound = true;
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            crashSoundIndex = 2;
-            bPlaySound = true;
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            crashSoundIndex = 3;
-            bPlaySound = true;
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            crashSoundIndex = 4;
-            bPlaySound = true;
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha6))
-        {
-            crashSoundIndex = 5;
-            bPlaySound = true;
-        }
-
-        if (bPlaySound)
-        {
-            teapotAudio.PlayOneShot(crashSoundArray[crashSoundIndex], 1.0f);
-        }
-#endif
-    }
-
-
-    // Really liked this rotate script to drive teapots in circle.
-    // Not sure how flexible this would be if collisions force teapots out of circle.
-    void Rotate()
-    {
-        if (rotateClockwise)
-        {
-            float x = -Mathf.Cos(timer) * xSpread;
-            float z = Mathf.Sin(timer) * zSpread;
-            Vector3 pos = new Vector3(x, yOffset, z);
-            //transform.position = pos + centerPoint.position;
-            transform.position = pos;
-        }
-        else
-        {
-            float x = Mathf.Cos(timer) * xSpread;
-            float z = Mathf.Sin(timer) * zSpread;
-            Vector3 pos = new Vector3(x, yOffset, z);
-            //transform.position = pos + centerPoint.position;
-            transform.position = pos;
+            // The center of our globular cluster is (0,0,0).
+            //           Vector3 difference = -this.transform.position;
+            //           float dist = difference.magnitude;
+            //           Vector3 gravityDirection = difference.normalized;
+            //           float gravity = (9.81f * this.transform.localScale.x) / (dist * dist);
+            //           Vector3 gravityVector = (gravityDirection * gravity);
+            //           this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
+            //           this.transform.GetComponent<Rigidbody>().AddForce(gravityVector, ForceMode.Acceleration);
+            ////this.transform.RotateAround(Vector3.zero, axis, 5.0f);
+            this.transform.RotateAround(Vector3.zero, Vector3.up, .05f);
         }
     }
 

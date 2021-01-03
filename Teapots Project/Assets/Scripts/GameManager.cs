@@ -125,6 +125,8 @@ public class GameManager : MonoBehaviour
             Renderer render = teapot.GetComponent<Renderer>();
             script.m_Renderer = render;
             render.material.color = levelColor;
+            Vector3 axisVector = new Vector3(startVector.x, startVector.y, startVector.z);
+            script.axis = axisVector;
         }
     }
 
@@ -196,7 +198,6 @@ public class GameManager : MonoBehaviour
                 SetLoScore(iLoScore);
                 // ToDo: Save in app memory so Start() can retrieve it.
             }
-
         }
         else    // Playing blasster
         {

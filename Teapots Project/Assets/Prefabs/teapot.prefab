@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 3649331767197328803}
   - component: {fileID: 6396498521005000189}
   m_Layer: 0
-  m_Name: Teapot
+  m_Name: teapot
   m_TagString: Teapot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -107,7 +107,7 @@ Rigidbody:
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -123,12 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41c1617f8d0504a828c270070021d347, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xSpread: 10
-  zSpread: 10
-  yOffset: 0
-  rotSpeed: 2
-  rotateClockwise: 0
-  doRotate: 0
+  m_Renderer: {fileID: 0}
   teapotAudio: {fileID: 0}
   explosionPrefab: {fileID: 4393673706604397538, guid: 13752c6c2c7964c31830dff6762dfc1d,
     type: 3}
@@ -140,6 +135,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 9dc5c9cf12314462ba5e9e123a1ef7d0, type: 3}
   - {fileID: 8300000, guid: 7329fa839f9b94258b1f1bd6597be158, type: 3}
   explosionSound: {fileID: 8300000, guid: 7c3306b8d98cb4565b2f286a11cd5589, type: 3}
+  pointValue: 0
+  isTagged: 0
 --- !u!82 &6396498521005000189
 AudioSource:
   m_ObjectHideFlags: 0
