@@ -27,6 +27,8 @@ public class GameManager : MonoBehaviour
     public int iTeapots;    // zero based 16 total / level
     public int iLevel;      // tube number % 16 (0-5 regular; 6 -> tubenum > 96)
     public int scorePerTeapot;
+    public Vector3 teapotRotateVector;
+    public float teapotRotateSpeed;
     public TextMeshProUGUI teapotsGameText; // Tag or Blaster?
     public TextMeshProUGUI livesText;
     public TextMeshProUGUI scoreText;
@@ -84,27 +86,68 @@ public class GameManager : MonoBehaviour
 
     public void StartNewLevel(int level)
     {
-        Color levelColor;
+        Color levelColor;   // will be assigned to each teapot because color can change during game play.
+
+        // Originally each teapot had its own axis to spin around, but that allowed
+        // teapots to bump in to each other. By having only one axis that all teapots
+        // orbit around, we avoid most collisions. First incarnation used Vector3.up
+        // as the axis, but that meant the top and bottom teapots lined up directly
+        // with the axis and only spun instead of orbitting. So now use an axis that is
+        // between existing starting spots, so no teapot is directly on the axis so all
+        // now orbit, however small the orbit radius may be.
+        // There are 4 points in the positive quadrent. Use the angles that
+        // are between each set of point:
+        //new Vector3(10f, 10f, 10f), // 0
+        //new Vector3(0f, 14.1f, 0f), // 9
+        //new Vector3(14.1f, 0f, 0f), // 10
+        //new Vector3(5f, 0f, 13f), // 14
+        //----------------------------
+        // angle = (x0 + x1) / 2
+        //(10f, 10f, 10f)[0] + (0f, 14.1f, 0f)[9] = (10f, 24.1f, 10f)
+        //(10f, 10f, 10f)[0] + (14.1f, 0f, 0f)[10] = (24.1f, 10f, 10f)
+        //(10f, 10f, 10f)[0] + (5f, 0f, 13f)[14] = (15f, 10f, 23f)
+        //(0f, 14.1f, 0f)[9] + (14.1f, 0f, 0f)[10] = (14.1f, 14.1f, 0f)
+        //(0f, 14.1f, 0f)[9] + (5f, 0f, 13f)[14] = (5f, 14.1f, 13f)
+        //(14.1f, 0f, 0f)[10 + (5f, 0f, 13f)[14] = (19.1f, 0f, 13f)
+
         switch (level)
         {
             case 0:
                 levelColor = Color.blue;
+                //(10f, 10f, 10f)[0] + (0f, 14.1f, 0f)[9] = (10f, 24.1f, 10f)
+                teapotRotateVector = new Vector3(5.0f, 12.05f, 5.0f);
+                teapotRotateSpeed = .05f;
                 break;
             case 1:
                 levelColor = Color.red;
+                //(10f, 10f, 10f)[0] + (14.1f, 0f, 0f)[10] = (24.1f, 10f, 10f)
+                teapotRotateVector = new Vector3(12.05f, 5.0f, 5.0f);
+                teapotRotateSpeed = -.1f;
                 break;
             case 2:
                 levelColor = Color.yellow;
+                //(10f, 10f, 10f)[0] + (5f, 0f, 13f)[14] = (15f, 10f, 23f)
+                teapotRotateVector = new Vector3(7.5f, 5.0f, 11.5f);
+                teapotRotateSpeed = .15f;
                 break;
             case 3:
                 levelColor = Color.cyan;
+                //(0f, 14.1f, 0f)[9] + (14.1f, 0f, 0f)[10] = (14.1f, 14.1f, 0f)
+                teapotRotateVector = new Vector3(7.05f, 7.05f, 0.0f);
+                teapotRotateSpeed = -.2f;
                 break;
             case 4:
                 levelColor = Color.black;
+                //(0f, 14.1f, 0f)[9] + (5f, 0f, 13f)[14] = (5f, 14.1f, 13f)
+                teapotRotateVector = new Vector3(2.5f, 7.05f, 6.5f);
+                teapotRotateSpeed = .25f;
                 break;
             default:        // Default color for tubnum > 96
                 // Want darker green than Color.green
                 levelColor = new Color(0f, 100f / 255f, 0f, 1.0f);
+                //(14.1f, 0f, 0f)[10 + (5f, 0f, 13f)[14] = (19.1f, 0f, 13f)
+                teapotRotateVector = new Vector3(9.55f, 0.0f, 6.5f);
+                teapotRotateSpeed = -.3f;
                 break;
         }
 
@@ -123,10 +166,12 @@ public class GameManager : MonoBehaviour
             teapots[i] = teapot;
             TeapotScript script = teapot.GetComponent<TeapotScript>();
             Renderer render = teapot.GetComponent<Renderer>();
-            script.m_Renderer = render;
+            script.m_Renderer = render;     // Need to store render for dynamic color change.
             render.material.color = levelColor;
-            Vector3 axisVector = new Vector3(startVector.x, startVector.y, startVector.z);
-            script.axis = axisVector;
+            // No longer use individual teapot rotate axis, because by assigning only 1 rotate
+            // axis per level, all teapots will rotate around same one and there will be no collisions.
+            //Vector3 axisVector = new Vector3(startVector.x, startVector.y, startVector.z);
+            //script.axis = axisVector;
         }
     }
 
@@ -284,7 +329,7 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // Really should say Game Winner!
+                // ToDo: Really should say Game Winner!
                 GameOver();
             }
         }

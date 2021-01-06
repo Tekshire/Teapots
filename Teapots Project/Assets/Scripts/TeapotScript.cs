@@ -19,7 +19,7 @@ public class TeapotScript : MonoBehaviour
     public AudioClip explosionSound;
     public int pointValue;
     public bool isTagged = false;
-    public Vector3 axis;
+    //public Vector3 axis;
 
 
     // Start is called before the first frame update
@@ -55,16 +55,31 @@ public class TeapotScript : MonoBehaviour
     {
         if (gameManager.isGameActive)
         {
-            // The center of our globular cluster is (0,0,0).
-            //           Vector3 difference = -this.transform.position;
-            //           float dist = difference.magnitude;
-            //           Vector3 gravityDirection = difference.normalized;
-            //           float gravity = (9.81f * this.transform.localScale.x) / (dist * dist);
-            //           Vector3 gravityVector = (gravityDirection * gravity);
-            //           this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
-            //           this.transform.GetComponent<Rigidbody>().AddForce(gravityVector, ForceMode.Acceleration);
-            ////this.transform.RotateAround(Vector3.zero, axis, 5.0f);
-            this.transform.RotateAround(Vector3.zero, Vector3.up, .05f);
+            if (!isTagged)
+            {
+                // The center of our globular cluster is (0,0,0).
+                //           Vector3 difference = -this.transform.position;
+                //           float dist = difference.magnitude;
+                //           Vector3 gravityDirection = difference.normalized;
+                //           float gravity = (9.81f * this.transform.localScale.x) / (dist * dist);
+                //           Vector3 gravityVector = (gravityDirection * gravity);
+                //           this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
+                //           this.transform.GetComponent<Rigidbody>().AddForce(gravityVector, ForceMode.Acceleration);
+                ////this.transform.RotateAround(Vector3.zero, axis, 5.0f);
+                transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed);
+                /*
+                 * RotateAround() is depricated; suggestion is to use Rotate().
+                 * If i use the same axis vector for all teapots, they all orbit parallel to each other,
+                 * so there should be no collisions. OK for first pass. Not sure if basis for RotateAround
+                 * is Translate or AddForce. If the former, collisions will not respond to physics, so may
+                 * need a way to escape from RotateAround if collied with (using "isTagged" variable).
+                 */
+            }
+            else
+            {
+                // By experiment have determined that RotateAround uses Translate to move object.
+                // Thus teapots move through each other.
+            }
         }
     }
 
