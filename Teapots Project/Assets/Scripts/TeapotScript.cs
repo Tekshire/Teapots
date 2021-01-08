@@ -1,4 +1,10 @@
 ﻿#define TRACE_COLLISIONS
+// Right now, if we use RotateAround to move teapots, underlying motion will use Translate
+// to reposition the teapots. This will not respond to physics and teapots will pass through
+// one another. Not the behavior we would like. So someday replace teapot motion with AddForce
+// based calls. Until then, keep teapots moving in orbits, even if tagged, so they don't
+// appear to fly through each other.
+#define TRANSLATE_TEAPOTS
 
 using System.Collections;
 using System.Collections.Generic;
@@ -55,8 +61,10 @@ public class TeapotScript : MonoBehaviour
     {
         if (gameManager.isGameActive)
         {
+#if !TRANSLATE_TEAPOTS
             if (!isTagged)
             {
+#endif
                 // The center of our globular cluster is (0,0,0).
                 //           Vector3 difference = -this.transform.position;
                 //           float dist = difference.magnitude;
@@ -74,12 +82,14 @@ public class TeapotScript : MonoBehaviour
                  * is Translate or AddForce. If the former, collisions will not respond to physics, so may
                  * need a way to escape from RotateAround if collied with (using "isTagged" variable).
                  */
+#if !TRANSLATE_TEAPOTS
             }
             else
             {
                 // By experiment have determined that RotateAround uses Translate to move object.
                 // Thus teapots move through each other.
             }
+#endif
         }
     }
 
