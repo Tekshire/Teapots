@@ -1,0 +1,23 @@
+(1) create a 3D Radar
+(2) Delete the Render Camera
+(3) Run the scene 
+(4) if everything is fine , move to the next step , else let us know what happened. daimangou@gmail.com
+(5) Undo the deletion of the Render Camera
+(6) Set the Render Camera to render your "Radar" layered ovjects
+(7) Select your Radar and set its layer and children to your "Radar" layer
+(8) Turn on the screen space function from inside the Radar Builder Editor window
+(9) In the Designs area ,drag your Render Camera into the Render Camera area
+(10) Turn on "Manual Camera Setup" and drag you main camera into the "Camera" area
+(11) Go to the Positioning foldout and set "Snap Positioning" to bottom middle.
+(12) Select your Main camera and remove "Radar" from the list of layers it will render
+(13) Run the scene 
+(14) if everything is fine , move to the next step , else let us know what happened. daimangou@gmail.com
+(15) Turn on the Minimap system.
+(16) Go to the "Minimap Setting" in the Designs area and click "Create Minimap Camera"
+(17) Go the the Render Texture section under "Minimap Settings" and look for the rt render texture and set it there.
+(18) Set your Camera Height to 10 .
+(19) Place the material named "Masked" in the Map Material area
+(20) Place the material named "Mask" in the Mask Material area.
+(21) Set "On Layer" to your "Radar" layer
+(22) draw the rt render texture into the "Target Texture" area in your Realtime Minimap Camera
+(23) Reduce your scene scale , it controls the focus size of the camera . if it is too far you may not see your map is your map is small
