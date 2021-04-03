@@ -5,6 +5,7 @@
 // based calls. Until then, keep teapots moving in orbits, even if tagged, so they don't
 // appear to fly through each other.
 #define TRANSLATE_TEAPOTS
+#define MOVE_TEAPOTS
 
 using System.Collections;
 using System.Collections.Generic;
@@ -13,7 +14,6 @@ using UnityEngine;
 
 public class TeapotScript : MonoBehaviour
 {
-    private float timer = 0;
     private GameManager gameManager;
     public Renderer m_Renderer;
     public AudioSource teapotAudio;    // Made public so i can play with pitch modifier in inspector
@@ -65,23 +65,25 @@ public class TeapotScript : MonoBehaviour
             if (!isTagged)
             {
 #endif
-                // The center of our globular cluster is (0,0,0).
-                //           Vector3 difference = -this.transform.position;
-                //           float dist = difference.magnitude;
-                //           Vector3 gravityDirection = difference.normalized;
-                //           float gravity = (9.81f * this.transform.localScale.x) / (dist * dist);
-                //           Vector3 gravityVector = (gravityDirection * gravity);
-                //           this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
-                //           this.transform.GetComponent<Rigidbody>().AddForce(gravityVector, ForceMode.Acceleration);
-                ////this.transform.RotateAround(Vector3.zero, axis, 5.0f);
-                transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed);
-                /*
-                 * RotateAround() is depricated; suggestion is to use Rotate().
-                 * If i use the same axis vector for all teapots, they all orbit parallel to each other,
-                 * so there should be no collisions. OK for first pass. Not sure if basis for RotateAround
-                 * is Translate or AddForce. If the former, collisions will not respond to physics, so may
-                 * need a way to escape from RotateAround if collied with (using "isTagged" variable).
-                 */
+#if MOVE_TEAPOTS
+            // The center of our globular cluster is (0,0,0).
+            //           Vector3 difference = -this.transform.position;
+            //           float dist = difference.magnitude;
+            //           Vector3 gravityDirection = difference.normalized;
+            //           float gravity = (9.81f * this.transform.localScale.x) / (dist * dist);
+            //           Vector3 gravityVector = (gravityDirection * gravity);
+            //           this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
+            //           this.transform.GetComponent<Rigidbody>().AddForce(gravityVector, ForceMode.Acceleration);
+            ////this.transform.RotateAround(Vector3.zero, axis, 5.0f);
+            transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed);
+            /*
+             * RotateAround() is depricated; suggestion is to use Rotate().
+             * If i use the same axis vector for all teapots, they all orbit parallel to each other,
+             * so there should be no collisions. OK for first pass. Not sure if basis for RotateAround
+             * is Translate or AddForce. If the former, collisions will not respond to physics, so may
+             * need a way to escape from RotateAround if collied with (using "isTagged" variable).
+             */
+#endif
 #if !TRANSLATE_TEAPOTS
             }
             else
@@ -127,15 +129,14 @@ public class TeapotScript : MonoBehaviour
     }
 
 
+    IEnumerator DelayDeath()
+    {
+        yield return new WaitForSeconds(1.0f);
+        Destroy(gameObject);
+    }
 
-IEnumerator DelayDeath()
-{
-    yield return new WaitForSeconds(1.0f);
-    Destroy(gameObject);
-}
 
-
-private void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter(Collision collision)
     {
 #if (TRACE_COLLISIONS)
         Debug.Log("Teapot OnCollisionEnter: " + gameObject + " collided with " + collision.gameObject);
@@ -158,15 +159,13 @@ private void OnCollisionEnter(Collision collision)
         {
             // Change teapot color only if hit by Player
             // AND ONLY IF WE'RE PLAYING TAG. (Collision noise is OK though.)
-            if (collision.gameObject.CompareTag("Player") && gameManager.bPlayingTag)
-            // And only if playing tag.
+            if (collision.gameObject.CompareTag("Player"))
             {
                 m_Renderer.material.color = Color.white;
                 isTagged = true;
             }
         }   // isGameActive
     }
-
 
 }
 

@@ -458,7 +458,7 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
     void LateUpdate()
     {
         // No input, spawning, or scoring if game not active.
-        if (gameManager.isGameActive && !gameManager.bPlayingTag)
+        if (gameManager.isGameActive)
         {
             // Check for charge fired after ship move, so charge move will match ship move.
             if (Input.GetKeyDown(KeyCode.Space))

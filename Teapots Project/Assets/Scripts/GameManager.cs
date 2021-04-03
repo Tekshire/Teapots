@@ -14,7 +14,6 @@ public class GameManager : MonoBehaviour
 {
     // Since the main goal of Teapots is to become Tempest in a Teapot and Tempest
     // has shooting, make Teapots Blaster the default.
-    public bool bPlayingTag = false;
     public bool bGameOver = false;
     // No input, spawning, or scoring if game no longer active.
     public bool isGameActive;
@@ -22,36 +21,31 @@ public class GameManager : MonoBehaviour
     public int iTotalLives; // To calculate granting new life. (Includes lives you've lost)
     public int iScore;      // score for Teapot Blaster
     public int iHiScore;    // High score for Teapot Blaster
-    public int iLoScore;    // Low score for Teapot Tag
-    public int iTimer;      // score for Teapot Tag
     public int iTeapots;    // zero based 16 total / level
     public int iLevel;      // tube number % 16 (0-5 regular; 6 -> tubenum > 96)
     public int scorePerTeapot;
     public Vector3 teapotRotateVector;
     public float teapotRotateSpeed;
-    public TextMeshProUGUI teapotsGameText; // Tag or Blaster?
     public TextMeshProUGUI livesText;
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI hiScoreText;
-    public TextMeshProUGUI loScoreText;
     public TextMeshProUGUI teapotsLeftText;
     public TextMeshProUGUI gameOverText;
     public TextMeshProUGUI winnerText;
     public TextMeshProUGUI teapotsTitleText;
 
-    public Button tagStartButton;
     public Button blasterStartButton;
     public Button restartButton;
     public GameObject scoreElement;
-    public GameObject loScoreElement;
     public GameObject hiScoreElement;
 
     public GameObject teapotPrefab;
+///    public GameObject radarBlipPrefab;
 
     // In Teapots, we know we only have 16 objects per level, so we can use an array.
     // When we begin to add in the Tempest objects, we can use the List recommended by
     // Unity in the Code Live Tutorials, Week 6, session 1.
-    public GameObject[] teapots = new GameObject[16];
+    public GameObject[] teapots;
 
 
     void Start()
@@ -61,12 +55,10 @@ public class GameManager : MonoBehaviour
         gameOverText.gameObject.SetActive(false);
         restartButton.gameObject.SetActive(false);
         teapotsTitleText.gameObject.SetActive(true);
-        tagStartButton.gameObject.SetActive(true);
         blasterStartButton.gameObject.SetActive(true);
 
         // Stuff that is the same for each level
         iScore = 0;
-        iTimer = 0;
         iTeapots = 16;
 
         UpdateLives(0);
@@ -75,12 +67,11 @@ public class GameManager : MonoBehaviour
 
         // Stuff we should update from app memory
         //iHiScore
-        //iLoScore
         //UpdateHiScore(iHiScore);
-        //UpdateLoScore(iLoScore);
 
         iLevel = 0;
         StartNewLevel(iLevel);
+
     }
 
 
@@ -122,32 +113,32 @@ public class GameManager : MonoBehaviour
                 levelColor = Color.red;
                 //(10f, 10f, 10f)[0] + (14.1f, 0f, 0f)[10] = (24.1f, 10f, 10f)
                 teapotRotateVector = new Vector3(12.05f, 5.0f, 5.0f);
-                teapotRotateSpeed = -.1f;
+                teapotRotateSpeed = -.07f;
                 break;
             case 2:
                 levelColor = Color.yellow;
                 //(10f, 10f, 10f)[0] + (5f, 0f, 13f)[14] = (15f, 10f, 23f)
                 teapotRotateVector = new Vector3(7.5f, 5.0f, 11.5f);
-                teapotRotateSpeed = .15f;
+                teapotRotateSpeed = .09f;
                 break;
             case 3:
                 levelColor = Color.cyan;
                 //(0f, 14.1f, 0f)[9] + (14.1f, 0f, 0f)[10] = (14.1f, 14.1f, 0f)
                 teapotRotateVector = new Vector3(7.05f, 7.05f, 0.0f);
-                teapotRotateSpeed = -.2f;
+                teapotRotateSpeed = -.11f;
                 break;
             case 4:
                 levelColor = Color.black;
                 //(0f, 14.1f, 0f)[9] + (5f, 0f, 13f)[14] = (5f, 14.1f, 13f)
                 teapotRotateVector = new Vector3(2.5f, 7.05f, 6.5f);
-                teapotRotateSpeed = .25f;
+                teapotRotateSpeed = .13f;
                 break;
             default:        // Default color for tubnum > 96
                 // Want darker green than Color.green
                 levelColor = new Color(0f, 100f / 255f, 0f, 1.0f);
                 //(14.1f, 0f, 0f)[10 + (5f, 0f, 13f)[14] = (19.1f, 0f, 13f)
                 teapotRotateVector = new Vector3(9.55f, 0.0f, 6.5f);
-                teapotRotateSpeed = -.3f;
+                teapotRotateSpeed = -.15f;
                 break;
         }
 
@@ -176,26 +167,9 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public void StartTagGame()
-    {
-        iTotalLives = iLives = 1;
-        scorePerTeapot = 0; // We don't destroy any teapots in tag
-        bPlayingTag = true;
-        teapotsGameText.SetText("Teapots Tag");
-        loScoreElement.SetActive(true);
-        hiScoreElement.SetActive(false);
-        scorePerTeapot = 0; // We don't destroy any teapots in tag
-
-        StartPlay();
-    }
-
-
     public void StartBlasterGame()
     {
         iTotalLives = iLives = 3;
-        //bPlayingTag = false;                          // Already set by LoadScene
-        //teapotsGameText.SetText("Teapots Blaster");   // Already set by LoadScene
-        loScoreElement.SetActive(false);
         hiScoreElement.SetActive(true);
         scorePerTeapot = 1000 + (500 * iLevel);
 
@@ -213,11 +187,9 @@ public class GameManager : MonoBehaviour
         SetLives(iLives);
         UpdateScore(iScore);
         SetHiScore(iHiScore);
-        SetLoScore(iLoScore);
         UpdateTeapotsDisplay();
 
         teapotsTitleText.gameObject.SetActive(false);
-        tagStartButton.gameObject.SetActive(false);
         blasterStartButton.gameObject.SetActive(false);
 
         bGameOver = false;
@@ -235,25 +207,13 @@ public class GameManager : MonoBehaviour
             gameOverText.gameObject.SetActive(true);
         restartButton.gameObject.SetActive(true);
         // Check to see if this is a new high score,
-        if (bPlayingTag)
+        if (iScore > iHiScore)
         {
-            if (iTimer < iLoScore)
-            {
-                iLoScore = iTimer;
-                SetLoScore(iLoScore);
-                // ToDo: Save in app memory so Start() can retrieve it.
-            }
+            iHiScore = iScore;
+            SetHiScore(iHiScore);
+            // ToDo: Save in app memory so Start() can retrieve it.
         }
-        else    // Playing blasster
-        {
-            if (iScore > iHiScore)
-            {
-                iHiScore = iScore;
-                SetHiScore(iHiScore);
-                // ToDo: Save in app memory so Start() can retrieve it.
-            }
-        }
-        // Note, Start overwrites the hi and lo scores.
+        // Note, Start overwrites the hi score.
     }
 
 
@@ -345,15 +305,8 @@ public class GameManager : MonoBehaviour
 
     public void UpdateScore(int scoreToAdd)
     {
-        if (bPlayingTag)
-        {
-            scoreText.text = iTimer.ToString();
-        }
-        else
-        {
-            iScore += scoreToAdd;
-            scoreText.text = iScore.ToString();
-        }
+        iScore += scoreToAdd;
+        scoreText.text = iScore.ToString();
     }
 
 
@@ -361,13 +314,6 @@ public class GameManager : MonoBehaviour
     public void SetHiScore(int newHiScore)
     {
         hiScoreText.text = newHiScore.ToString();
-    }
-
-
-    // Update lo score only happens at end of game, so just display score.
-    public void SetLoScore(int newLoScore)
-    {
-        loScoreText.text = newLoScore.ToString();
     }
 
 
