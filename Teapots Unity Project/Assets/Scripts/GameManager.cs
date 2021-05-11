@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     // has shooting, make Teapots Blaster the default.
     public bool bGameOver = false;
     // No input, spawning, or scoring if game no longer active.
+    // But movement may still happen to get objects off screen.
     public bool isGameActive;
     public int iLives;      // Current lives; 0 => new game
     public int iTotalLives; // To calculate granting new life. (Includes lives you've lost)
@@ -33,14 +34,14 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI gameOverText;
     public TextMeshProUGUI winnerText;
     public TextMeshProUGUI teapotsTitleText;
-       
-    public Button blasterStartButton;
+
+    public Button startButton;
     public Button restartButton;
     public GameObject scoreElement;
     public GameObject hiScoreElement;
 
     public GameObject teapotPrefab;
-///    public GameObject radarBlipPrefab;
+    ///    public GameObject radarBlipPrefab;
 
     // In Teapots, we know we only have 16 objects per level, so we can use an array.
     // When we begin to add in the Tempest objects, we can use the List recommended by
@@ -55,7 +56,7 @@ public class GameManager : MonoBehaviour
         gameOverText.gameObject.SetActive(false);
         restartButton.gameObject.SetActive(false);
         teapotsTitleText.gameObject.SetActive(true);
-        blasterStartButton.gameObject.SetActive(true);
+        startButton.gameObject.SetActive(true);
 
         // Stuff that is the same for each level
         iScore = 0;
@@ -190,7 +191,7 @@ public class GameManager : MonoBehaviour
         UpdateTeapotsDisplay();
 
         teapotsTitleText.gameObject.SetActive(false);
-        blasterStartButton.gameObject.SetActive(false);
+        startButton.gameObject.SetActive(false);
 
         bGameOver = false;
         isGameActive = true;

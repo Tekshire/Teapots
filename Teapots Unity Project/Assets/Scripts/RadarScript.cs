@@ -1,3 +1,5 @@
+#undef TRACE_RADAR
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +15,7 @@ public class RadarScript : MonoBehaviour
 
     // Off GameManager script
     //public GameObject[] teapots;
-    
+
     public float radarCenterX;
     public float radarCenterY;
     public float radarCenterZ;
@@ -196,6 +198,7 @@ public class RadarScript : MonoBehaviour
 
                 radarBlips[i].SetActive(true);
 
+#if (TRACE_RADAR)
                 // Rats! Each Debug.Log statement winds up a discreet output in the Unity console, so i can only copy
                 // 1 line at a time to put into a full editor in order to more easily compare parts from different times.
                 // Minimize hassle by combining seveeral lines of statements into single massive debug lines.
@@ -211,13 +214,15 @@ public class RadarScript : MonoBehaviour
                     "   Magnitude = " + blipMagnitude + "; Scale = " + normY + "\n" +
 
                     "\n");
-
-    }
+#endif
+            }
 
             playerX = playerTransform.position.x;
 
         }
 
+#if (TRACE_RADAR)
         Debug.Log("=============================");
+#endif
     }
 }

@@ -498,7 +498,7 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
             // Check tag to avoid this situation.
             if (other.CompareTag("Charge")) return;
 
-        // So far, there are only 2 ojects with triggers: charges and enemy charges.
+        // So far, there are only 2 ojects with triggers: charges and enemy shots.
         // (I suppose later we may have flippers etc that may have triggers.)
         // Player probably does not move fast enough to catch up to any of its own charges,
         // so any trigger enter must be for enemycharge. But maybe check tag just to be sure

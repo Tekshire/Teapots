@@ -7,9 +7,9 @@ using UnityEngine;
 
 public class ChargeScript : MonoBehaviour
 {
-    private const float maxShotDist = 40f;
+    private const float maxChargeDist = 40f;
     // Shot speed set as part of velocity at Charge instantiation in PlayerControl.
-    public float shotSpeed;
+    public float chargeSpeed;
     public GameManager gameManager;
 
 
@@ -19,11 +19,11 @@ public class ChargeScript : MonoBehaviour
 
     }
 
-    void FixedUpdate()
+    void Update()
     {
-        if ((transform.position.x > maxShotDist) || (transform.position.x < -maxShotDist) ||
-            (transform.position.z > maxShotDist) || (transform.position.z < -maxShotDist) ||
-            (transform.position.y > maxShotDist) || (transform.position.y < -maxShotDist))
+        if ((transform.position.x > maxChargeDist) || (transform.position.x < -maxChargeDist) ||
+            (transform.position.z > maxChargeDist) || (transform.position.z < -maxChargeDist) ||
+            (transform.position.y > maxChargeDist) || (transform.position.y < -maxChargeDist))
         {
             // We've gone too far, so destroy charge.
             Destroy(gameObject);
@@ -43,7 +43,7 @@ public class ChargeScript : MonoBehaviour
         Debug.Log("Charge OnTriggerEnter: " + gameObject + " triggered by " + other.gameObject);
 #endif
         // I only want to blow up teapots, so check for that.
-        if (other.gameObject.tag == "Teapot")
+        if (other.gameObject.CompareTag("Teapot"))
         {
             // Teapot destruction now happens in teapot script.
             //Destroy(other.gameObject);
