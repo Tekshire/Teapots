@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI gameOverText;
     public TextMeshProUGUI winnerText;
     public TextMeshProUGUI teapotsTitleText;
-
+       
     public Button blasterStartButton;
     public Button restartButton;
     public GameObject scoreElement;

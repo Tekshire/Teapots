@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,7 +13,7 @@ public class RadarScript : MonoBehaviour
 
     // Off GameManager script
     //public GameObject[] teapots;
-
+    
     public float radarCenterX;
     public float radarCenterY;
     public float radarCenterZ;
