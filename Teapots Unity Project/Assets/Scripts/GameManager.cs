@@ -51,33 +51,35 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        iScore = 0;
+        iTeapots = 16;
+        iTotalLives = iLives = 3;
+
         bGameOver = false;
         isGameActive = false;       // Not until Start button pressed
         gameOverText.gameObject.SetActive(false);
         restartButton.gameObject.SetActive(false);
         teapotsTitleText.gameObject.SetActive(true);
+        hiScoreElement.SetActive(true);
         startButton.gameObject.SetActive(true);
-
-        // Stuff that is the same for each level
-        iScore = 0;
-        iTeapots = 16;
-
-        UpdateLives(0);
-        UpdateScore(0);
-        UpdateTeapotsDisplay();
 
         // Stuff we should update from app memory
         //iHiScore
+
+        // Set the display
+        UpdateLives(0);
+        UpdateScore(0);
+        UpdateTeapotsDisplay();
         //UpdateHiScore(iHiScore);
 
         iLevel = 0;
         StartNewLevel(iLevel);
-
     }
 
 
     public void StartNewLevel(int level)
     {
+        scorePerTeapot = 1000 + (500 * iLevel);
         Color levelColor;   // will be assigned to each teapot because color can change during game play.
 
         // Originally each teapot had its own axis to spin around, but that allowed
@@ -100,7 +102,7 @@ public class GameManager : MonoBehaviour
         //(10f, 10f, 10f)[0] + (5f, 0f, 13f)[14] = (15f, 10f, 23f)
         //(0f, 14.1f, 0f)[9] + (14.1f, 0f, 0f)[10] = (14.1f, 14.1f, 0f)
         //(0f, 14.1f, 0f)[9] + (5f, 0f, 13f)[14] = (5f, 14.1f, 13f)
-        //(14.1f, 0f, 0f)[10 + (5f, 0f, 13f)[14] = (19.1f, 0f, 13f)
+        //(14.1f, 0f, 0f)[10] + (5f, 0f, 13f)[14] = (19.1f, 0f, 13f)
 
         switch (level)
         {
@@ -137,7 +139,7 @@ public class GameManager : MonoBehaviour
             default:        // Default color for tubnum > 96
                 // Want darker green than Color.green
                 levelColor = new Color(0f, 100f / 255f, 0f, 1.0f);
-                //(14.1f, 0f, 0f)[10 + (5f, 0f, 13f)[14] = (19.1f, 0f, 13f)
+                //(14.1f, 0f, 0f)[10] + (5f, 0f, 13f)[14] = (19.1f, 0f, 13f)
                 teapotRotateVector = new Vector3(9.55f, 0.0f, 6.5f);
                 teapotRotateSpeed = -.15f;
                 break;
@@ -168,20 +170,6 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public void StartBlasterGame()
-    {
-        iTotalLives = iLives = 3;
-        hiScoreElement.SetActive(true);
-        scorePerTeapot = 1000 + (500 * iLevel);
-
-        StartPlay();
-    }
-
-
-    // Teapot Tag and Teapot Blaster use the same game logic with just a few
-    // parameters different between the two games. StartTagGame() and StartBlasterGame()
-    // will set up the parameters that are different beteween the game versions.
-    // StartGame() then do all the work to get the game playing.
     public void StartPlay()
     {
         // ToDo: Some of these have already been done in Start() etc.
@@ -252,7 +240,6 @@ public class GameManager : MonoBehaviour
                 Destroy(tp);
                 break;      // Only kill first one we find
             }
-
         }
 #endif
     }
