@@ -3,7 +3,11 @@ guid: 41c1617f8d0504a828c270070021d347
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - m_Renderer: {instanceID: 0}
+  - teapotAudio: {instanceID: 0}
+  - explosionPrefab: {instanceID: 0}
+  - explosionSound: {fileID: 8300000, guid: 7c3306b8d98cb4565b2f286a11cd5589, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

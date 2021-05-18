@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour
     public int iLevel;      // tube number % 16 (0-5 regular; 6 -> tubenum > 96)
     public int scorePerTeapot;
     public Vector3 teapotRotateVector;
-    public float teapotRotateSpeed;
+    public float teapotRotateSpeed;     // Will be multiplied by Time.deltaTime
     public TextMeshProUGUI livesText;
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI hiScoreText;
@@ -39,6 +39,8 @@ public class GameManager : MonoBehaviour
     public Button restartButton;
     public GameObject scoreElement;
     public GameObject hiScoreElement;
+
+    public GameObject player;       // For other objects to calculate distance
 
     public GameObject teapotPrefab;
     ///    public GameObject radarBlipPrefab;
@@ -54,6 +56,7 @@ public class GameManager : MonoBehaviour
         iScore = 0;
         iTeapots = 16;
         iTotalLives = iLives = 3;
+        player = GameObject.FindWithTag("Player");
 
         bGameOver = false;
         isGameActive = false;       // Not until Start button pressed

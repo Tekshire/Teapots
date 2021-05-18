@@ -1,16 +1,23 @@
 ﻿#define TRACE_COLLISIONS
-// Right now, if we use RotateAround to move teapots, underlying motion will use Translate
-// to reposition the teapots. This will not respond to physics and teapots will pass through
-// one another. Not the behavior we would like. So someday replace teapot motion with AddForce
-// based calls. Until then, keep teapots moving in orbits, even if tagged, so they don't
-// appear to fly through each other.
-#define TRANSLATE_TEAPOTS
 #define MOVE_TEAPOTS
 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// The original plan for teapot motion was to allow them to collide with each other and
+// the player's ship and then use physics to bounce away. In order to use physics, we needed
+// to use FixedUpdate() instead of Update(). However, to get the teapots flying in orbits,
+// we used transform.RotateAround() which does not use physics and thus cancelled out our
+// bouncing. So we keep teapot motion in the Update() function which has the added advantage
+// of moving each frame for smoother motion. The player colliding with teapots had 2 other
+// purposes. 1. We had a non-shooting version of Teapots that was "Tag". For that we wanted
+// the bouncing away behavior, but we have simplified our game design by removing that option,
+// so we no longer need it for that reason. 2. For Tempest in a Teapot, the original plan had
+// been to collide with the spout in order to dive down inside the teapot to play Tempest.
+// However that was too challenging, so latest plans just require colliding anywhere on the
+// teapot and then slurppig automatically to the spout. So i now no longer need teapot motion
+// to be in FixedUpdate().
 
 public class TeapotScript : MonoBehaviour
 {
@@ -41,56 +48,24 @@ public class TeapotScript : MonoBehaviour
     }
 
 
-    // Teapot movement uses force of gravity pulling down, while centripital
-    // force tends to keep teapot moving forward.
-    // Force of gravity:
-    //      F = G (m1 * m2) / r^2
-    // Programming:
-    /*
-    void Update() {
-      foreach (GameObject s in spheres) {
-        Vector3 difference = this.transform.position - s.transform.position;
-        float dist = difference.magnitude;
-        Vector3 gravityDirection = difference.normalized;
-        float gravity = 9.81f * (this.transform.localScale.x * s.transform.localScale.x
-            * 80) / (dist * dist);
-        Vector3 gravityVector = (gravityDirection * gravity);
-        s.transform.GetComponent<Rigidbody>().AddForce(gravityVector, ForceMode.Acceleration); }}
-    */
-    void FixedUpdate()    // Don't need Time.deltaTime when using FixedUpdate.
+    void Update()
     {
         if (gameManager.isGameActive)
         {
-#if !TRANSLATE_TEAPOTS
-            if (!isTagged)
-            {
-#endif
 #if MOVE_TEAPOTS
             // The center of our globular cluster is (0,0,0).
-            //           Vector3 difference = -this.transform.position;
-            //           float dist = difference.magnitude;
-            //           Vector3 gravityDirection = difference.normalized;
-            //           float gravity = (9.81f * this.transform.localScale.x) / (dist * dist);
-            //           Vector3 gravityVector = (gravityDirection * gravity);
-            //           this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
-            //           this.transform.GetComponent<Rigidbody>().AddForce(gravityVector, ForceMode.Acceleration);
+            // this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
             ////this.transform.RotateAround(Vector3.zero, axis, 5.0f);
-            transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed);
+            transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed * Time.deltaTime);
             /*
              * RotateAround() is depricated; suggestion is to use Rotate().
              * If i use the same axis vector for all teapots, they all orbit parallel to each other,
              * so there should be no collisions. OK for first pass. Not sure if basis for RotateAround
              * is Translate or AddForce. If the former, collisions will not respond to physics, so may
              * need a way to escape from RotateAround if collied with (using "isTagged" variable).
+             * NOTE: IF WE DO MOVE TO USING FORCE, IT WILL HAVE TO BE DONE IN FIXEDUPDATE() INSTEAD 
+             * OF UPDATE().
              */
-#endif
-#if !TRANSLATE_TEAPOTS
-            }
-            else
-            {
-                // By experiment have determined that RotateAround uses Translate to move object.
-                // Thus teapots move through each other.
-            }
 #endif
         }
     }
@@ -105,34 +80,41 @@ public class TeapotScript : MonoBehaviour
 #if (TRACE_COLLISIONS)
         Debug.Log("Teapot OnTriggerEnter: " + gameObject + " triggered by " + other.gameObject);
 #endif
-        // Right now only object with trigger is charge, so no need to check at this time.
-        // Only blow up teapot if it hits a charge.
-        // if (other.gameObject.tag == "Charge")
-        // {
-        // First do animation because light moves faster than sound.
-        // Call explosion animation.
-        Destroy(gameObject);
-        GameObject explosionObject =
-            Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+        // Only blow up teapot if it hit by player charge.
+        if (other.gameObject.CompareTag("Charge"))
+        {
+            // First do animation because light moves faster than sound.
+            // Call explosion animation.
+            GameObject explosionObject =
+                Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+            // Explosion sound
+            // (Remember teapotAudio is destroyed when we Destroy(gameObject) below,
+            // so need new AudioSource that will last until sound is done.)
+            AudioSource explosionAudio = explosionObject.GetComponent<AudioSource>();
+            Vector3 toPlayer = gameManager.player.transform.position - transform.position;
+            float distance = toPlayer.magnitude;
+            // Want sound volume to fall off faster than pure distance so use r^2
+            distance = distance * distance / 25.0f;
+            if (distance < 0) distance = -distance;
+            if (distance < 1.0f) distance = 1.0f;
+            explosionAudio.PlayOneShot(explosionSound, 1.0f / distance);
 
-        // Explosion sound
-        AudioSource explosionAudio = explosionObject.GetComponent<AudioSource>();
-        explosionAudio.PlayOneShot(explosionSound);
+            Destroy(gameObject);    // Someday replace with exploding teapot segments.
 
-        gameManager.UpdateScore(pointValue);
+            // Plan to have explosion animation overwhelm teapot, so don't destroy until a bit later.
+            // (Use co-routine to do destruction later.)
+            //       Destroy(gameObject);
+            //   StartCoroutine(DelayDeath());
 
-        // Plan to have explosion animation overwhelm teapot, so don't destroy until a bit later.
-        // (Use co-routine to do destruction later.)
-        //       Destroy(gameObject);
-        //   StartCoroutine(DelayDeath());
-        // }    // tag == "Charge"
+            gameManager.UpdateScore(pointValue);
+        }   // Charge
     }
 
 
     IEnumerator DelayDeath()
     {
         yield return new WaitForSeconds(1.0f);
-        Destroy(gameObject);
+        Destroy(gameObject);    // Maybe use to clean up explosionObject residue.
     }
 
 
@@ -148,11 +130,11 @@ public class TeapotScript : MonoBehaviour
         //        Debug.Log("Audio Clip should be: " + crashSoundArray[crashSoundIndex]);
         // Affect volume by how fast the ship is striking the teapot.
         // Sound only attenuates, so value between 0.0 and 1.0. Use maxVel to make sure
-        // fasted collision equals loudest sound.
+        // fastest collision equals loudest sound.
         float collisionSpeed = collision.relativeVelocity.magnitude;
         if (collisionSpeed > maxVel)
             maxVel = collisionSpeed;
-        teapotAudio.PlayOneShot(crashSoundArray[crashSoundIndex], collisionSpeed/maxVel);
+        teapotAudio.PlayOneShot(crashSoundArray[crashSoundIndex], collisionSpeed / maxVel);
 
         // ToDo: collision sound should also be dependent upon if we are playing game or not.
         if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.

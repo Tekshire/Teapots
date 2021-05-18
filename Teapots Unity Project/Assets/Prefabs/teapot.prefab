@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 3649331767197328803}
   - component: {fileID: 6396498521005000189}
   m_Layer: 0
-  m_Name: Teapot
+  m_Name: teapot
   m_TagString: Teapot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -131,10 +131,6 @@ MonoBehaviour:
   teapotAudio: {fileID: 0}
   explosionPrefab: {fileID: 4393673706604397538, guid: 13752c6c2c7964c31830dff6762dfc1d,
     type: 3}
-  enemyShotPrefab: {fileID: 3678939498343982228, guid: 788a9b908bf0d4620908b9ade581fcad,
-    type: 3}
-  playerObj: {fileID: 0}
-  spoutOffset: {x: 0, y: 0, z: 0}
   crashSoundArray:
   - {fileID: 8300000, guid: 2af217baba3864ae2ab75ba33ce4ea83, type: 3}
   - {fileID: 8300000, guid: 2c27564b0bf8c4a3081a51c877835ac1, type: 3}
@@ -143,7 +139,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 9dc5c9cf12314462ba5e9e123a1ef7d0, type: 3}
   - {fileID: 8300000, guid: 7329fa839f9b94258b1f1bd6597be158, type: 3}
   explosionSound: {fileID: 8300000, guid: 7c3306b8d98cb4565b2f286a11cd5589, type: 3}
-  steamSound: {fileID: 0}
   pointValue: 0
   isTagged: 0
 --- !u!82 &6396498521005000189

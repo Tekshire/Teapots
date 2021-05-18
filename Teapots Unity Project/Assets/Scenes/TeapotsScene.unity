@@ -1311,6 +1311,7 @@ MonoBehaviour:
   restartButton: {fileID: 741687134}
   scoreElement: {fileID: 767227793}
   hiScoreElement: {fileID: 636269139}
+  player: {fileID: 0}
   teapotPrefab: {fileID: 5840400238222320164, guid: df989eb2c183b4b41801373150403873,
     type: 3}
   teapots:
