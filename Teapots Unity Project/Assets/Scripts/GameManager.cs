@@ -169,6 +169,7 @@ public class GameManager : MonoBehaviour
             // axis per level, all teapots will rotate around same one and there will be no collisions.
             //Vector3 axisVector = new Vector3(startVector.x, startVector.y, startVector.z);
             //script.axis = axisVector;
+            script.index = i;
         }
     }
 

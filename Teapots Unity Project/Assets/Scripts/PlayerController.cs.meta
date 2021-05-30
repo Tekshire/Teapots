@@ -3,7 +3,12 @@ guid: 39b4a5aec4f7a434489d1fe1049601c8
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - chargePrefab: {instanceID: 0}
+  - rb: {instanceID: 0}
+  - playerAudioSource: {instanceID: 0}
+  - shotSound: {instanceID: 0}
+  - gameManager: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

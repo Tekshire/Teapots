@@ -6,7 +6,10 @@ MonoImporter:
   defaultReferences:
   - m_Renderer: {instanceID: 0}
   - teapotAudio: {instanceID: 0}
-  - explosionPrefab: {instanceID: 0}
+  - explosionPrefab: {fileID: 4393673706604397538, guid: 13752c6c2c7964c31830dff6762dfc1d,
+      type: 3}
+  - shotPrefab: {fileID: 8163183648981220355, guid: ace0927facb72400fae5e79a15c22136,
+      type: 3}
   - explosionSound: {fileID: 8300000, guid: 7c3306b8d98cb4565b2f286a11cd5589, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}

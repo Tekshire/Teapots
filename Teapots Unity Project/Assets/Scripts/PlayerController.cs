@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     public float shipSpeedMax;
     public float shipSpeedStep;
     public float levelSpeed;
-    public float shotSpeed;
+    public float chargeSpeed;
     public float shipRange = 25f;
     ///    public float startMouseX;
     ///    public float deltaMouseX;
@@ -31,7 +31,7 @@ public class PlayerController : MonoBehaviour
 
     public Rigidbody rb;
     public AudioSource playerAudioSource;
-    public AudioClip shotSound;
+    public AudioClip chargeSound;
     public GameManager gameManager; // change to private after we let inspector show we get value.
 
 
@@ -55,7 +55,7 @@ public class PlayerController : MonoBehaviour
         // May want to programatically init to allow for increased speed as we go up levels.
         turnSpeed = 15.0f;      // Good speed to get ship turning from dead stop.
         raiseSpeed = 5.0f;      // Same speed as rotation was too much.
-        shotSpeed = 10.0f;
+        chargeSpeed = 10.0f;
         shipSpeed = 0.0f;       // Start with no forward motion.
         shipSpeedMax = 4.0f;
         shipSpeedStep = 0.5f;
@@ -468,13 +468,13 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
                 GameObject sgo = Instantiate(chargePrefab, transform.position, transform.rotation);
                 // Make sure the shot is going the way the ship is pointing.
                 Rigidbody srb = sgo.GetComponent<Rigidbody>();
-                srb.velocity = transform.forward * shotSpeed;
+                srb.velocity = transform.forward * chargeSpeed;
 
                 // Get lower score if you just blast away. (Not part of regular Tempest.)
                 gameManager.UpdateScore(-1);
 
                 // Eventually check for sound
-                playerAudioSource.PlayOneShot(shotSound, 1.0f);
+                playerAudioSource.PlayOneShot(chargeSound, 1.0f);
             }
         }   // isGameActive
     }

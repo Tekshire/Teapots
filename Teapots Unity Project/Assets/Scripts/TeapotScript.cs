@@ -1,5 +1,6 @@
 ﻿#define TRACE_COLLISIONS
 #define MOVE_TEAPOTS
+#define TEST_FIRE_SHOTS
 
 using System.Collections;
 using System.Collections.Generic;
@@ -25,14 +26,19 @@ public class TeapotScript : MonoBehaviour
     public Renderer m_Renderer;
     public AudioSource teapotAudio;    // Made public so i can play with pitch modifier in inspector
     public GameObject explosionPrefab;
-
+    public GameObject shotPrefab;
+    public float shotSpeed = 5.0f;  // For now, 1/2 chargeSpeed (set in PayerController.Start().)
 
     static float maxVel = 2.0f;
     public AudioClip[] crashSoundArray = new AudioClip[6];
     public AudioClip explosionSound;
     public int pointValue;
     public bool isTagged = false;
+    public int index = -1;      // Valid indexes are 0 - 15.
+
     //public Vector3 axis;
+    public static Vector3 spoutOffset = new Vector3(-1.45f, 1.2f, 0.0f);
+    // Values above are overridden by values entered into inspector.
 
 
     // Start is called before the first frame update
@@ -67,6 +73,59 @@ public class TeapotScript : MonoBehaviour
              * OF UPDATE().
              */
 #endif
+            // Check to see if we fire shot at player
+            bool bFireShot = false;
+#if TEST_FIRE_SHOTS
+            switch (index)
+            {
+                case 0:
+                case 10:
+                    if (Input.GetKeyDown(KeyCode.Alpha0)) bFireShot = true;
+                    break;
+                case 1:
+                case 11:
+                    if (Input.GetKeyDown(KeyCode.Alpha1)) bFireShot = true;
+                    break;
+                case 2:
+                case 12:
+                    if (Input.GetKeyDown(KeyCode.Alpha2)) bFireShot = true;
+                    break;
+                case 3:
+                case 13:
+                    if (Input.GetKeyDown(KeyCode.Alpha3)) bFireShot = true;
+                    break;
+                case 4:
+                case 14:
+                    if (Input.GetKeyDown(KeyCode.Alpha4)) bFireShot = true;
+                    break;
+                case 5:
+                case 15:
+                    if (Input.GetKeyDown(KeyCode.Alpha5)) bFireShot = true;
+                    break;
+                case 6:
+                    if (Input.GetKeyDown(KeyCode.Alpha6)) bFireShot = true;
+                    break;
+                case 7:
+                    if (Input.GetKeyDown(KeyCode.Alpha7)) bFireShot = true;
+                    break;
+                case 8:
+                    if (Input.GetKeyDown(KeyCode.Alpha8)) bFireShot = true;
+                    break;
+                case 9:
+                    if (Input.GetKeyDown(KeyCode.Alpha9)) bFireShot = true;
+                    break;
+            }
+#endif
+            if (bFireShot)
+            {
+                // Fire shot
+                ///GameObject sgo = Instantiate(chargePrefab, transform.position, chargePrefab.transform.rotation);
+                GameObject shotObj = Instantiate(shotPrefab, transform.position + spoutOffset, transform.rotation);
+                // Make sure the shot is going the way the ship is pointing.
+                Rigidbody shotRB = shotObj.GetComponent<Rigidbody>();
+                shotRB.velocity = transform.up * shotSpeed;
+            }
+
         }
     }
 

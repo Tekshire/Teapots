@@ -131,6 +131,9 @@ MonoBehaviour:
   teapotAudio: {fileID: 0}
   explosionPrefab: {fileID: 4393673706604397538, guid: 13752c6c2c7964c31830dff6762dfc1d,
     type: 3}
+  shotPrefab: {fileID: 8163183648981220355, guid: ace0927facb72400fae5e79a15c22136,
+    type: 3}
+  shotSpeed: 5
   crashSoundArray:
   - {fileID: 8300000, guid: 2af217baba3864ae2ab75ba33ce4ea83, type: 3}
   - {fileID: 8300000, guid: 2c27564b0bf8c4a3081a51c877835ac1, type: 3}
@@ -141,6 +144,8 @@ MonoBehaviour:
   explosionSound: {fileID: 8300000, guid: 7c3306b8d98cb4565b2f286a11cd5589, type: 3}
   pointValue: 0
   isTagged: 0
+  index: -1
+  spoutOffset: {x: -1.45, y: 1.2, z: 0}
 --- !u!82 &6396498521005000189
 AudioSource:
   m_ObjectHideFlags: 0
