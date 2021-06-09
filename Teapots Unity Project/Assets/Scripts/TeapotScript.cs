@@ -62,7 +62,8 @@ public class TeapotScript : MonoBehaviour
             // The center of our globular cluster is (0,0,0).
             // this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
             ////this.transform.RotateAround(Vector3.zero, axis, 5.0f);
-            transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed * Time.deltaTime);
+            transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed);
+            ///transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed * Time.deltaTime);
             /*
              * RotateAround() is depricated; suggestion is to use Rotate().
              * If i use the same axis vector for all teapots, they all orbit parallel to each other,
@@ -73,6 +74,19 @@ public class TeapotScript : MonoBehaviour
              * OF UPDATE().
              */
 #endif
+
+        }
+    }   // Update()
+
+
+    // When firing enemy shots from Update(), shots did not fire from tip of teapot spout.
+    // So move shot spawning here so teapot has already moved when we check for spout location.
+    void LateUpdate()
+    {
+        // No input, spawning, or scoring if game not active.
+        if (gameManager.isGameActive)
+        {
+
             // Check to see if we fire shot at player
             bool bFireShot = false;
 #if TEST_FIRE_SHOTS
@@ -119,15 +133,32 @@ public class TeapotScript : MonoBehaviour
             if (bFireShot)
             {
                 // Fire shot
-                ///GameObject sgo = Instantiate(chargePrefab, transform.position, chargePrefab.transform.rotation);
-                GameObject shotObj = Instantiate(shotPrefab, transform.position + spoutOffset, transform.rotation);
+                //GameObject shotObj = Instantiate(shotPrefab, transform.position + spoutOffset, transform.rotation);
+                GameObject shotObj = Instantiate(shotPrefab, transform.position + (transform.rotation * spoutOffset), transform.rotation);
+                // Note: Matrix multiplication must be Quarternion * vector, not reverse.
+#if false
+                Vector3 shotPos = transform.position + spoutOffset;
+                Debug.Log("Shooting from teapot[" + index + "]\n" +
+                    "transform.localPosition: x = " + transform.localPosition.x + ", y = " +
+                    transform.localPosition.y + ", z = " + transform.localPosition.z + "\n" +
+                    "transform.position: x = " + transform.position.x + ", y = " +
+                    transform.position.y + ", z = " + transform.position.z + "\n" +
+                    "spoutOffset: x = " + spoutOffset.x + ", y = " +
+                    spoutOffset.y + ", z = " + spoutOffset.z + "\n" +
+                    "shotPos: x = " + shotPos.x + ", y = " +
+                    shotPos.y + ", z = " + shotPos.z + "\n" +
+                    "teapot spout: x = " + shotObj.transform.position.x + ", y = " +
+                    shotObj.transform.position.y + ", z = " + shotObj.transform.position.z + "\n" +
+                    "transform.rotation: " + transform.rotation + "\n"
+                    );
+#endif
                 // Make sure the shot is going the way the ship is pointing.
                 Rigidbody shotRB = shotObj.GetComponent<Rigidbody>();
                 shotRB.velocity = transform.up * shotSpeed;
             }
 
-        }
-    }
+        }   // isGameActive
+    }   // LateUpdate()
 
 
     // No longer have trigger on teapot in order to enable bouncing off ship.
