@@ -133,9 +133,15 @@ public class TeapotScript : MonoBehaviour
             if (bFireShot)
             {
                 // Fire shot
-                //GameObject shotObj = Instantiate(shotPrefab, transform.position + spoutOffset, transform.rotation);
-                GameObject shotObj = Instantiate(shotPrefab, transform.position + (transform.rotation * spoutOffset), transform.rotation);
+                GameObject shotObj = Instantiate(shotPrefab,
+                    transform.position + (transform.rotation * spoutOffset),
+                    transform.rotation);
                 // Note: Matrix multiplication must be Quarternion * vector, not reverse.
+
+                // Make sure the shot is going the way the ship is pointing.
+                Rigidbody shotRB = shotObj.GetComponent<Rigidbody>();
+                shotRB.velocity = transform.up * shotSpeed;
+
 #if false
                 Vector3 shotPos = transform.position + spoutOffset;
                 Debug.Log("Shooting from teapot[" + index + "]\n" +
@@ -152,9 +158,6 @@ public class TeapotScript : MonoBehaviour
                     "transform.rotation: " + transform.rotation + "\n"
                     );
 #endif
-                // Make sure the shot is going the way the ship is pointing.
-                Rigidbody shotRB = shotObj.GetComponent<Rigidbody>();
-                shotRB.velocity = transform.up * shotSpeed;
             }
 
         }   // isGameActive
