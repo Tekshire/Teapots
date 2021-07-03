@@ -7,7 +7,7 @@ MonoImporter:
   - chargePrefab: {instanceID: 0}
   - rb: {instanceID: 0}
   - playerAudioSource: {instanceID: 0}
-  - shotSound: {instanceID: 0}
+  - chargeSound: {fileID: 8300000, guid: 7988f23d0cfe04f1d875f413c258b416, type: 3}
   - gameManager: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
