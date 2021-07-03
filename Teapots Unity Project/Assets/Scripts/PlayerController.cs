@@ -50,6 +50,7 @@ public class PlayerController : MonoBehaviour
 
         rb = GetComponent<Rigidbody>();
         playerAudioSource = GetComponent<AudioSource>();
+        // chargeSound audio clip should be set to xfire in Player prefab's version of PlayerController script.
 
         // Let speeds be set in Inspector while developing.
         // May want to programatically init to allow for increased speed as we go up levels.
