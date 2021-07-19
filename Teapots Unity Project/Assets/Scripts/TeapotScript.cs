@@ -1,5 +1,5 @@
 ﻿#define TRACE_COLLISIONS
-#define MOVE_TEAPOTS
+#undef MOVE_TEAPOTS
 #define TEST_FIRE_SHOTS
 
 using System.Collections;
@@ -27,11 +27,14 @@ public class TeapotScript : MonoBehaviour
     public AudioSource teapotAudio;    // Made public so i can play with pitch modifier in inspector
     public GameObject explosionPrefab;
     public GameObject shotPrefab;
+    //public GameObject steamPrefab;
+    public ParticleSystem steamParticles;
     public float shotSpeed = 5.0f;  // For now, 1/2 chargeSpeed (set in PayerController.Start().)
 
     static float maxVel = 2.0f;
     public AudioClip[] crashSoundArray = new AudioClip[6];
-    public AudioClip explosionSound;
+    public AudioClip explosionSound;    // purchased "Explosion Glass Blasstwave Fx".
+    public AudioClip steamSound;        // PressurizedSteam from Particle Pack 5 package.
     public int pointValue;
     public bool isTagged = false;
     public int index = -1;      // Valid indexes are 0 - 15.
@@ -49,6 +52,22 @@ public class TeapotScript : MonoBehaviour
         //Fetch the Renderer component of the GameObject to change color
         m_Renderer = GetComponent<Renderer>();
         teapotAudio = GetComponent<AudioSource>();
+
+#if TEST_FIRE_SHOTS
+        // Try to find particle system at runtime:
+        //steamParticles = GetComponentInChildren<ParticleSystem>();
+        //Debug.Log("Start GetComponentInChildren particle system: " + steamParticles);
+
+        // Find Type
+        steamParticles = null;
+        var foundParticleSystems = FindObjectsOfType<ParticleSystem>();
+        for (int i = 0; i < foundParticleSystems.Length; i++)
+        {
+            if (foundParticleSystems[i].gameObject.CompareTag("ParticleSystem"))
+                steamParticles = foundParticleSystems[i];
+        }
+        Debug.Log("Start FindObjectsOfType<ParticleSystem>: " + steamParticles + "\n");
+#endif
 
         pointValue = 1000;  // Depends upon game level
     }
@@ -132,6 +151,45 @@ public class TeapotScript : MonoBehaviour
 #endif
             if (bFireShot)
             {
+
+#if TEST_FIRE_SHOTS
+                //Debug.Log("Start Static pointer to particle system: " + steamParticles);
+                // Creation of ParticleSystem> atarts with PressurisedSteam(UnityEngine.ParticleSystem).
+
+                // Try to find particle system at runtime:
+                //steamParticles = GetComponentInChildren<ParticleSystem>();
+                //Debug.Log("GetComponentInChildren particle system: " + steamParticles);
+                // GetComponentInChildren<ParticleSystem>() returns PressurisedSteam(UnityEngine.ParticleSystem).
+
+                // GetComponent
+                //steamParticles = GetComponent<ParticleSystem>();
+                //Debug.Log("GetComponent particle system: " + steamParticles + "\n");
+                // GetComponent<ParticleSystem>() returns null. Don't use.
+                if (steamParticles != null)
+                    steamParticles.Play();
+#endif
+
+
+
+                // Fire steam that will propel shot out spout.
+                //GameObject steamObj = Instantiate(steamPrefab,
+                //    transform.position + (transform.rotation * spoutOffset),
+                //    transform.rotation);
+                ///GameObject steamObj = Instantiate(steamPrefab,
+                ///    transform.position + (transform.rotation * spoutOffset),
+                ///    transform.up);        // <----------- up instead of transform.rotate.
+                /// Note: Matrix multiplication must be Quarternion * vector, not reverse.
+                /// Also: Quaternion rot = Quaternion.Euler(V3.x, V3.y, V3.z);
+                ///GameObject steamObj = Instantiate(steamPrefab,
+                ///    transform.position + (transform.rotation * spoutOffset),
+                ///    Quaternion.Euler(transform.up.x, transform.up.y, transform.up.z));
+
+                /////steamParticles.Play();
+
+                //// Make sure the steam is going the way the ship spout is pointing.
+                //Rigidbody steamRB = steamObj.GetComponent<Rigidbody>();
+                //steamRB.velocity = transform.up * shotSpeed;
+
                 // Fire shot
                 GameObject shotObj = Instantiate(shotPrefab,
                     transform.position + (transform.rotation * spoutOffset),
@@ -141,6 +199,8 @@ public class TeapotScript : MonoBehaviour
                 // Make sure the shot is going the way the ship is pointing.
                 Rigidbody shotRB = shotObj.GetComponent<Rigidbody>();
                 shotRB.velocity = transform.up * shotSpeed;
+
+                // shot sound from teapot is actually sound of steam coming from pot.
 
 #if false
                 Vector3 shotPos = transform.position + spoutOffset;

@@ -10,7 +10,10 @@ MonoImporter:
       type: 3}
   - shotPrefab: {fileID: 8163183648981220355, guid: ace0927facb72400fae5e79a15c22136,
       type: 3}
+  - steamPrefab: {fileID: 4057602836130095536, guid: b028e1e860abe4024bcf3a25f93e4eeb,
+      type: 3}
   - explosionSound: {fileID: 8300000, guid: 7c3306b8d98cb4565b2f286a11cd5589, type: 3}
+  - steamSound: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
