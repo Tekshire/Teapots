@@ -55,17 +55,17 @@ public class TeapotScript : MonoBehaviour
 
 #if TEST_FIRE_SHOTS
         // Try to find particle system at runtime:
-        //steamParticles = GetComponentInChildren<ParticleSystem>();
+        steamParticles = GetComponentInChildren<ParticleSystem>();
         //Debug.Log("Start GetComponentInChildren particle system: " + steamParticles);
 
         // Find Type
-        steamParticles = null;
-        var foundParticleSystems = FindObjectsOfType<ParticleSystem>();
-        for (int i = 0; i < foundParticleSystems.Length; i++)
-        {
-            if (foundParticleSystems[i].gameObject.CompareTag("ParticleSystem"))
-                steamParticles = foundParticleSystems[i];
-        }
+        ///steamParticles = null;
+        ///var foundParticleSystems = FindObjectsOfType<ParticleSystem>();
+        ///for (int i = 0; i < foundParticleSystems.Length; i++)
+        ///{
+        ///    if (foundParticleSystems[i].gameObject.CompareTag("ParticleSystem"))
+        ///        steamParticles = foundParticleSystems[i];
+        ///}
         Debug.Log("Start FindObjectsOfType<ParticleSystem>: " + steamParticles + "\n");
 #endif
 
