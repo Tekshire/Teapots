@@ -27,7 +27,6 @@ public class TeapotScript : MonoBehaviour
     public AudioSource teapotAudio;    // Made public so i can play with pitch modifier in inspector
     public GameObject explosionPrefab;
     public GameObject shotPrefab;
-    //public GameObject steamPrefab;
     public ParticleSystem steamParticles;
     public float shotSpeed = 5.0f;  // For now, 1/2 chargeSpeed (set in PayerController.Start().)
 
@@ -53,21 +52,9 @@ public class TeapotScript : MonoBehaviour
         m_Renderer = GetComponent<Renderer>();
         teapotAudio = GetComponent<AudioSource>();
 
-#if TEST_FIRE_SHOTS
-        // Try to find particle system at runtime:
+        // Each teapot has a child particle system to provide steam for shot launch.
         steamParticles = GetComponentInChildren<ParticleSystem>();
-        //Debug.Log("Start GetComponentInChildren particle system: " + steamParticles);
-
-        // Find Type
-        ///steamParticles = null;
-        ///var foundParticleSystems = FindObjectsOfType<ParticleSystem>();
-        ///for (int i = 0; i < foundParticleSystems.Length; i++)
-        ///{
-        ///    if (foundParticleSystems[i].gameObject.CompareTag("ParticleSystem"))
-        ///        steamParticles = foundParticleSystems[i];
-        ///}
         Debug.Log("Start FindObjectsOfType<ParticleSystem>: " + steamParticles + "\n");
-#endif
 
         pointValue = 1000;  // Depends upon game level
     }
@@ -149,42 +136,24 @@ public class TeapotScript : MonoBehaviour
                     break;
             }
 #endif
+            // Normal check to see if we do fire a shot.
+            if (gameManager.bFireEnabled)
+            {
+                //int nextTeapotToFire = gameManager.lastTeapotShot = index;
+                int nextTeapotToFire = gameManager.nextTeapotShot;
+
+                // if we are the next teapot to fire, fire
+                if (nextTeapotToFire == index)
+                    bFireShot = true;
+            }
+                
+
+
             if (bFireShot)
             {
-
-#if TEST_FIRE_SHOTS
-                //Debug.Log("Start Static pointer to particle system: " + steamParticles);
-                // Creation of ParticleSystem> atarts with PressurisedSteam(UnityEngine.ParticleSystem).
-
-                // Try to find particle system at runtime:
-                //steamParticles = GetComponentInChildren<ParticleSystem>();
-                //Debug.Log("GetComponentInChildren particle system: " + steamParticles);
-                // GetComponentInChildren<ParticleSystem>() returns PressurisedSteam(UnityEngine.ParticleSystem).
-
-                // GetComponent
-                //steamParticles = GetComponent<ParticleSystem>();
-                //Debug.Log("GetComponent particle system: " + steamParticles + "\n");
-                // GetComponent<ParticleSystem>() returns null. Don't use.
+                // Start enemy shot with a puff of steam.
                 if (steamParticles != null)
                     steamParticles.Play();
-#endif
-
-
-
-                // Fire steam that will propel shot out spout.
-                //GameObject steamObj = Instantiate(steamPrefab,
-                //    transform.position + (transform.rotation * spoutOffset),
-                //    transform.rotation);
-                ///GameObject steamObj = Instantiate(steamPrefab,
-                ///    transform.position + (transform.rotation * spoutOffset),
-                ///    transform.up);        // <----------- up instead of transform.rotate.
-                /// Note: Matrix multiplication must be Quarternion * vector, not reverse.
-                /// Also: Quaternion rot = Quaternion.Euler(V3.x, V3.y, V3.z);
-                ///GameObject steamObj = Instantiate(steamPrefab,
-                ///    transform.position + (transform.rotation * spoutOffset),
-                ///    Quaternion.Euler(transform.up.x, transform.up.y, transform.up.z));
-
-                /////steamParticles.Play();
 
                 //// Make sure the steam is going the way the ship spout is pointing.
                 //Rigidbody steamRB = steamObj.GetComponent<Rigidbody>();
@@ -201,6 +170,14 @@ public class TeapotScript : MonoBehaviour
                 shotRB.velocity = transform.up * shotSpeed;
 
                 // shot sound from teapot is actually sound of steam coming from pot.
+
+                // Finally, if we shot, reset the shot counter.
+                gameManager.bFireEnabled = false;
+                gameManager.teapotShotTimer = 0;
+                int nextPossibleTeapotToShoot = index + 1;
+                if (nextPossibleTeapotToShoot >= 16) nextPossibleTeapotToShoot = 0;
+                gameManager.nextTeapotShot = nextPossibleTeapotToShoot;
+
 
 #if false
                 Vector3 shotPos = transform.position + spoutOffset;

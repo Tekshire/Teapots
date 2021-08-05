@@ -12,8 +12,6 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    // Since the main goal of Teapots is to become Tempest in a Teapot and Tempest
-    // has shooting, make Teapots Blaster the default.
     public bool bGameOver = false;
     // No input, spawning, or scoring if game no longer active.
     // But movement may still happen to get objects off screen.
@@ -24,7 +22,14 @@ public class GameManager : MonoBehaviour
     public int iHiScore;    // High score for Teapot Blaster
     public int iTeapots;    // zero based 16 total / level
     public int iLevel;      // tube number % 16 (0-5 regular; 6 -> tubenum > 96)
+    public int tubeNum = 0; // In Tempest every time we finish a tube, increase the tubeNum as we go forward.
+                            // Since Teapot can destroy a teapot outside of Tempest mode, we increase tubeNum
+                            // as if destroyed tube was last tube we sailed through in Tempest.
+    public float teapotShotTimer;
+    public const int iMaxShotTimer = 100;  // Max tube num = 96, * 60 frames / sec (Admitidly optimistic)
+    public bool bFireEnabled = false;
     public int scorePerTeapot;
+    public int nextTeapotShot;  // Spread chance to shoot around to other teapots.
     public Vector3 teapotRotateVector;
     public float teapotRotateSpeed;     // Will be multiplied by Time.deltaTime
     public TextMeshProUGUI livesText;
@@ -75,6 +80,7 @@ public class GameManager : MonoBehaviour
         UpdateTeapotsDisplay();
         //UpdateHiScore(iHiScore);
 
+        nextTeapotShot = 1;
         iLevel = 0;
         StartNewLevel(iLevel);
     }
@@ -82,6 +88,7 @@ public class GameManager : MonoBehaviour
 
     public void StartNewLevel(int level)
     {
+        teapotShotTimer = 0.0f;
         scorePerTeapot = 1000 + (500 * iLevel);
         Color levelColor;   // will be assigned to each teapot because color can change during game play.
 
@@ -246,11 +253,41 @@ public class GameManager : MonoBehaviour
             }
         }
 #endif
+        // Normal game play
+
+        bFireEnabled = false;
+        // In Tempest every time we finish a tube, increase the tubeNum as we go forward.
+        // Since Teapot can destroy a teapot outside of Tempest mode, we increase tubeNum
+        // as if destroyed tube was last tube we sailed through in Tempest.
+        tubeNum = iLevel * 16 + 16 - iTeapots;
+
+        if (isGameActive)
+        {
+            // If bFireEnabled we will have teapots[nextTeapotShot] do the firing.
+            // But what if that entry in the teapots array is null? We will never fire
+            // and, even worse, never look for a valid teapot that could shoot. Fix that here.
+            if (teapots[nextTeapotShot] == null)
+            {
+                // Look at next possible valid teapot
+                int nextPossibleTeapot = nextTeapotShot + 1;
+                if (nextPossibleTeapot >= 16) nextPossibleTeapot = 0;
+                nextTeapotShot = nextPossibleTeapot;
+            }
+            if (teapotShotTimer < iMaxShotTimer)
+            {
+                // The higher we go in the game, the faster the shots will come.
+                teapotShotTimer += (tubeNum + 1) * Time.deltaTime; // tubeNum can be 0.
+            }
+            else
+            {
+                bFireEnabled = true;
+            }
+        }   // isGameActive
     }
 
 
-    // After all of the gameplay has happened, see how many teapots are left.
-    void LateUpdate()
+// After all of the gameplay has happened, see how many teapots are left.
+void LateUpdate()
     {
         int remainingTeapots = 0;
 
@@ -344,22 +381,23 @@ public class GameManager : MonoBehaviour
     }
 
 
+    // Rearrange vector table to randomize where shots come from.
     Vector3[] startLocations = {
-        new Vector3(10f, 10f, 10f),
-        new Vector3(10f, 10f, -10f),
-        new Vector3(10f, -10f, 10f),
-        new Vector3(10f, -10f, -10f),
-        new Vector3(-10f, 10f, 10f),
-        new Vector3(-10f, 10f, -10f),
-        new Vector3(-10f, -10f, 10f),
-        new Vector3(-10f, -10f, -10f),
-        new Vector3(-5f, 0f, 13f),
-        new Vector3(0f, 14.1f, 0f),
-        new Vector3(14.1f, 0f, 0f),
-        new Vector3(-5f, 0f, -13f),
-        new Vector3(0f, -14.1f, 0f),
-        new Vector3(-14.1f, 0f, 0f),
-        new Vector3(5f, 0f, 13f),
-        new Vector3(5f, 0f, -13f)
+        new Vector3(10f, 10f, 10f),       // original index = 0
+        new Vector3(5f, 0f, 13f),         // original index = 14
+        new Vector3(-10f, -10f, 10f),     // original index = 6
+        new Vector3(-10f, -10f, -10f),    // original index = 7
+        new Vector3(0f, 14.1f, 0f),       // original index = 9
+        new Vector3(-10f, 10f, 10f),      // original index = 4
+        new Vector3(14.1f, 0f, 0f),       // original index = 10
+        new Vector3(10f, -10f, -10f),     // original index = 3
+        new Vector3(-5f, 0f, 13f),        // original index = 8
+        new Vector3(-5f, 0f, -13f),       // original index = 11
+        new Vector3(10f, -10f, 10f),      // original index = 2
+        new Vector3(0f, -14.1f, 0f),      // original index = 12
+        new Vector3(-10f, 10f, -10f),     // original index = 5
+        new Vector3(-14.1f, 0f, 0f),      // original index = 13
+        new Vector3(10f, 10f, -10f),      // original index = 1
+        new Vector3(5f, 0f, -13f)         // original index = 15
     };
 }
