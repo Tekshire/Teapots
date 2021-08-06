@@ -1,5 +1,5 @@
 ﻿#define TRACE_COLLISIONS
-#undef MOVE_TEAPOTS
+#define MOVE_TEAPOTS
 #define TEST_FIRE_SHOTS
 
 using System.Collections;
@@ -41,6 +41,7 @@ public class TeapotScript : MonoBehaviour
     //public Vector3 axis;
     public static Vector3 spoutOffset = new Vector3(-1.45f, 1.2f, 0.0f);
     // Values above are overridden by values entered into inspector.
+    public static Quaternion spoutToFace = Quaternion.Euler(90, 0, 0);
 
 
     // Start is called before the first frame update
@@ -80,7 +81,12 @@ public class TeapotScript : MonoBehaviour
              * OF UPDATE().
              */
 #endif
-
+            // As well as rotating about orbit, want spout facing player ship
+            Vector3 direction = gameManager.player.transform.position - transform.position;
+            // This is the quaternion that points the teapot's NORMAL face toward the player
+            Quaternion rotation = Quaternion.LookRotation(direction);
+            // Now adjust the direction to point the spout toward the player
+            transform.rotation = rotation * spoutToFace;    // Use multiply to add 2 quaternions
         }
     }   // Update()
 
