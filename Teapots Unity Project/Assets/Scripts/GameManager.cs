@@ -1,5 +1,6 @@
 ﻿#define TEST_LOSE_LIFE
 #define TEST_LOSE_TEAPOT
+#define TRACE_COLLISIONS
 
 using System.Collections;
 using System.Collections.Generic;
@@ -25,6 +26,9 @@ public class GameManager : MonoBehaviour
     public int tubeNum = 0; // In Tempest every time we finish a tube, increase the tubeNum as we go forward.
                             // Since Teapot can destroy a teapot outside of Tempest mode, we increase tubeNum
                             // as if destroyed tube was last tube we sailed through in Tempest.
+#if (TRACE_COLLISIONS)
+    public int lastShotNum = 0; // Only care which shot hits player when debugging.
+#endif
     public float teapotShotTimer;
     public const int iMaxShotTimer = 100;  // Max tube num = 96, * 60 frames / sec (Admitidly optimistic)
     public bool bFireEnabled = false;
@@ -55,12 +59,19 @@ public class GameManager : MonoBehaviour
     // Unity in the Code Live Tutorials, Week 6, session 1.
     public GameObject[] teapots;
 
+    // TEST VARIABLES
+    public int hitNum;  // How many shots hit player per level
+
 
     void Start()
     {
         iScore = 0;
         iTeapots = 16;
+#if (TRACE_COLLISIONS)
+        iTotalLives = iLives = 50;  // A lot more lives for debugging shots before death.
+#else
         iTotalLives = iLives = 3;
+#endif
         player = GameObject.FindWithTag("Player");
 
         bGameOver = false;
@@ -178,6 +189,9 @@ public class GameManager : MonoBehaviour
             //script.axis = axisVector;
             script.index = i;
         }
+
+        // TEST:
+        hitNum = 0;     // For this level no enemy shots have hit player.
     }
 
 
@@ -386,13 +400,13 @@ void LateUpdate()
         new Vector3(10f, 10f, 10f),       // original index = 0
         new Vector3(5f, 0f, 13f),         // original index = 14
         new Vector3(-10f, -10f, 10f),     // original index = 6
+        new Vector3(-5f, 0f, -13f),       // original index = 11
         new Vector3(-10f, -10f, -10f),    // original index = 7
         new Vector3(0f, 14.1f, 0f),       // original index = 9
         new Vector3(-10f, 10f, 10f),      // original index = 4
         new Vector3(14.1f, 0f, 0f),       // original index = 10
         new Vector3(10f, -10f, -10f),     // original index = 3
         new Vector3(-5f, 0f, 13f),        // original index = 8
-        new Vector3(-5f, 0f, -13f),       // original index = 11
         new Vector3(10f, -10f, 10f),      // original index = 2
         new Vector3(0f, -14.1f, 0f),      // original index = 12
         new Vector3(-10f, 10f, -10f),     // original index = 5

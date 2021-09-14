@@ -17,7 +17,7 @@ using UnityEngine;
 // so we no longer need it for that reason. 2. For Tempest in a Teapot, the original plan had
 // been to collide with the spout in order to dive down inside the teapot to play Tempest.
 // However that was too challenging, so latest plans just require colliding anywhere on the
-// teapot and then slurppig automatically to the spout. So i now no longer need teapot motion
+// teapot and then slurpping automatically to the spout. So i now no longer need teapot motion
 // to be in FixedUpdate().
 
 public class TeapotScript : MonoBehaviour
@@ -29,6 +29,7 @@ public class TeapotScript : MonoBehaviour
     public GameObject shotPrefab;
     public ParticleSystem steamParticles;
     public float shotSpeed = 5.0f;  // For now, 1/2 chargeSpeed (set in PayerController.Start().)
+    public float aimSpeed = 0.5f;
 
     static float maxVel = 2.0f;
     public AudioClip[] crashSoundArray = new AudioClip[6];
@@ -55,7 +56,7 @@ public class TeapotScript : MonoBehaviour
 
         // Each teapot has a child particle system to provide steam for shot launch.
         steamParticles = GetComponentInChildren<ParticleSystem>();
-        Debug.Log("Start FindObjectsOfType<ParticleSystem>: " + steamParticles + "\n");
+        //Debug.Log("Start FindObjectsOfType<ParticleSystem>: " + steamParticles + "\n");
 
         pointValue = 1000;  // Depends upon game level
     }
@@ -86,7 +87,9 @@ public class TeapotScript : MonoBehaviour
             // This is the quaternion that points the teapot's NORMAL face toward the player
             Quaternion rotation = Quaternion.LookRotation(direction);
             // Now adjust the direction to point the spout toward the player
-            transform.rotation = rotation * spoutToFace;    // Use multiply to add 2 quaternions
+            Quaternion aimDirection = rotation * spoutToFace;    // Use multiply to add 2 quaternions
+            //transform.rotation = rotation * spoutToFace;    // Use multiply to add 2 quaternions
+            transform.rotation = Quaternion.Lerp(transform.rotation, aimDirection, aimSpeed * Time.deltaTime);
         }
     }   // Update()
 
@@ -152,8 +155,6 @@ public class TeapotScript : MonoBehaviour
                 if (nextTeapotToFire == index)
                     bFireShot = true;
             }
-                
-
 
             if (bFireShot)
             {
@@ -174,6 +175,15 @@ public class TeapotScript : MonoBehaviour
                 // Make sure the shot is going the way the ship is pointing.
                 Rigidbody shotRB = shotObj.GetComponent<Rigidbody>();
                 shotRB.velocity = transform.up * shotSpeed;
+
+#if (TRACE_COLLISIONS)
+                ShotScript sScript = shotObj.GetComponent<ShotScript>();
+
+                int newShotNum = gameManager.lastShotNum + 1;
+                sScript.shotNum = newShotNum;
+                gameManager.lastShotNum = newShotNum;
+
+#endif
 
                 // shot sound from teapot is actually sound of steam coming from pot.
 

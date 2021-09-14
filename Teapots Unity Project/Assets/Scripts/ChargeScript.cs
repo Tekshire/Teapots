@@ -52,4 +52,11 @@ public class ChargeScript : MonoBehaviour
     }
 
 
+    private void OnCollisionEnter(Collision collision)
+    {
+#if (TRACE_COLLISIONS)
+        Debug.Log("Charge OnCollisionEnter: " + gameObject + " collided with " + collision.gameObject);
+#endif
+        // Just seeing if we come here at all.
+    }
 }

@@ -1,0 +1,119 @@
+Design Logic for Tempest in a Teapot Unity Project
+
+Collision Detection Logic:
+Action taken by GameObject should be in ALL CAPS.
+Player fires charges, per Tempest,
+so Teapots fire shots.
+
+GameObject	Collieds With	Trigger?	Action
+-----------	-------------	---------	--------------
+Player (ship or claw)
+		Player
+				OnCollisionEnter()
+						Only 1 player so should never collide with self.
+				OnTriggerEnter()
+						No trigger on Player
+		Teapot
+				OnCollisionEnter()
+						PLAYER BEING CONTROLLED BY HUMAN.
+						Teapot motion controlled by Teapot.onCollisionEnter.
+				OnTriggerEnter()
+						No trigger on Player
+		Charge
+				OnCollisionEnter()
+						Player should never catch up with one of it's charges.
+				OnTriggerEnter()
+						No trigger on Player
+		Shot
+				OnCollisionEnter()
+						Main action will be on Shot.OnTriggerEnter.
+						BUT SHOULD PLAYER EXPLOSION BE TRIGGERED HERE?
+							(Where is the Player.ClosestPoint valid for explosion start?)
+				OnTriggerEnter()
+						GET HERE FROM SHOT TRIGGER.
+						KICK OFF PLAYER EXPLOSIONS BECAUSE WE HAVE ACCESS TO ALL OF PLAYER
+Teapot
+		Player
+				OnCollisionEnter()
+						TEAPOT MOTION SHOULD BE CHANGED BY PHYSICS RIGIDBODY.
+							NOTE: Won't happen until we replace teapot orbit control with FixedUpdate.
+						TEAPOT MAKES BONG SOUND.
+						(BONUS ACTION: TEAPOT CHANGES TO WHITE)
+				OnTriggerEnter()
+						No trigger on Teapot
+		Teapot
+				OnCollisionEnter()
+						TEAPOT MOTION SHOULD BE CHANGED BY PHYSICS RIGIDBODY.
+							NOTE: Won't happen until we replace teapot orbit control with FixedUpdate.
+						TEAPOT MAKES BONG SOUND.
+						EACH TEAPOT WILL EMIT A BONG SOUND, FOR A DOUBLE BONG.
+				OnTriggerEnter()
+						No trigger on Teapot
+		Charge
+				OnCollisionEnter()
+						Charge motion controlled by Charge.OnTriggerEnter.
+				OnTriggerEnter()
+						No trigger on Teapot
+BUT DOES TEAPOT STILL GET A ONTRIGGERENTER BASED ON CHARGE'S TRIGGER?
+		Shot
+				OnCollisionEnter()
+						Main action will be on Shot.OnTriggerEnter.
+				OnTriggerEnter()
+						No trigger on Teapot
+Charge (isTrigger)
+		Player
+				OnCollisionEnter()
+						Player should never catch up with one of it's charges.
+				OnTriggerEnter()
+						Player should never catch up with one of it's charges.
+		Teapot
+				OnCollisionEnter()
+						MAKE TINK SOUND.
+						DESTROY CHARGE.
+							(Pick either OnCollisionEntry or onTriggerEntry, not both.)
+				OnTriggerEnter()
+						MAKE TINK SOUND.
+						DESTROY CHARGE.
+							(Pick either OnCollisionEntry or onTriggerEntry, not both.)
+		Charge
+				OnCollisionEnter()
+						Should rarely happen, but allow charges to pass through one another
+				OnTriggerEnter()
+						Unity does not allow 1 trigger to interact with another trigger.
+		Shot
+				OnCollisionEnter()
+						Should be tiny explosion and destroy both.
+							(Pick either Shot.OnCollisionEntry or Charge.OnCollisionEntry, not both.)
+							(Perhaps explosion on one and destroy on other?)
+				OnTriggerEnter()
+						Unity does not allow 1 trigger to interact with another trigger.
+Shot (isTrigger)
+		Player
+				OnCollisionEnter()
+						Could do Explosion of player here, but leave for PlayerOnTriggerEnter with shot.
+				OnTriggerEnter()
+						Could do Explosion of player here, but leave for PlayerOnTriggerEnter with shot.
+		Teapot
+				OnCollisionEnter()
+						TEAPOT MORE MASSIVE; DON'T BOUNCE OFF OR EXPLODE.
+						MAKE TINK SOUND.
+						DESTROY SHOT.
+							(Pick either OnCollisionEntry or onTriggerEntry, not both.)
+				OnTriggerEnter()
+						TEAPOT MORE MASSIVE; DON'T BOUNCE OFF OR EXPLODE.
+						MAKE TINK SOUND.
+						DESTROY SHOT.
+							(Pick either OnCollisionEntry or onTriggerEntry, not both.)
+		Charge
+				OnCollisionEnter()
+						Should be tiny explosion and destroy both.
+							(Pick either Shot.OnCollisionEntry or Charge.OnCollisionEntry, not both.)
+							(Perhaps explosion on one and destroy on other?)
+				OnTriggerEnter()
+						Unity does not allow 1 trigger to interact with another trigger.
+		Shot
+				OnCollisionEnter()
+						Should not happen, but allow shots to pass through one another
+				OnTriggerEnter()
+						Unity does not allow 1 trigger to interact with another trigger.
+

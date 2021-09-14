@@ -490,8 +490,10 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
     }
 
 
+#if (TRACE_COLLISIONS)
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("Player OnTriggerEnter: " + gameObject + " triggered by " + other.gameObject);
         if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
         {
             // When we first fire a shot, when the charge is created, it is within the
@@ -499,14 +501,17 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
             // Check tag to avoid this situation.
             if (other.CompareTag("Charge")) return;
 
-        // So far, there are only 2 ojects with triggers: charges and enemy shots.
-        // (I suppose later we may have flippers etc that may have triggers.)
-        // Player probably does not move fast enough to catch up to any of its own charges,
-        // so any trigger enter must be for enemycharge. But maybe check tag just to be sure
-        gameManager.UpdateLives(-1);
+            // So far, there are only 2 ojects with triggers: charges and enemy shots.
+            // (I suppose later we may have flippers etc that may have triggers.)
+            // Player probably does not move fast enough to catch up to any of its own charges,
+            // so any trigger enter must be for enemy shot. But maybe check tag just to be sure
+            if (other.CompareTag("EnemyShot")) return;
+
+            gameManager.UpdateLives(-1);
         }   // isGameActive
 
     }
+#endif
 
 
 }
