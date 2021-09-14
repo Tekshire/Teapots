@@ -9,6 +9,7 @@ TagManager:
   - Teapot
   - Charge
   - ParticleSystem
+  - EnemyShot
   layers:
   - Default
   - TransparentFX
