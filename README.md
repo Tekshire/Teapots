@@ -50,9 +50,11 @@ WebGL version built for first pass on tekshire.com web site.
 ## To Do
 - [x] Get Newell's Utah teapots as Unity asssets
 - [x] Build Claw in Blender
+- [x ] Shoot teapots.
+- [x ] Teapots explosion.
+- [x ] Add radar to find missing teapots.
 - [ ] Animate Claw
-- [ ] Shoot teapots.
-- [ ] Teapots explosion.
+- [ ] Release Teapots as separate game.
 - [ ] Fly down teapot spout
 - [ ] Program Tempest game.
 - [ ] Teapot explosion from inside.
