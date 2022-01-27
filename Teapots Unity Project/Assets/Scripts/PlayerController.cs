@@ -2,7 +2,8 @@
 #undef DEBUG_ANGLE_X
 #undef TEST_BACK_FLIP
 #undef TEST_GYROSCOPE
-#define TRACE_COLLISIONS
+#undef TRACE_COLLISIONS
+#define TEST_COLLISIONS
 
 using System.Collections;
 using System.Collections.Generic;

@@ -1,6 +1,7 @@
 ﻿#define TEST_LOSE_LIFE
 #define TEST_LOSE_TEAPOT
-#define TRACE_COLLISIONS
+#undef TRACE_COLLISIONS
+#define TEST_COLLISIONS
 
 using System.Collections;
 using System.Collections.Generic;
@@ -28,6 +29,15 @@ public class GameManager : MonoBehaviour
                             // as if destroyed tube was last tube we sailed through in Tempest.
 #if (TRACE_COLLISIONS)
     public int lastShotNum = 0; // Only care which shot hits player when debugging.
+#endif
+#if (TEST_COLLISIONS)
+    public GameObject homeTarget;
+    public GameObject homeCollider;
+    public GameObject testTarget;
+    public GameObject testCollider;
+    public GameObject playerPrefab;
+    public GameObject chargePrefab;
+    public GameObject shotPrefab;
 #endif
     public float teapotShotTimer;
     public const int iMaxShotTimer = 100;  // Max tube num = 96, * 60 frames / sec (Admitidly optimistic)
@@ -67,13 +77,6 @@ public class GameManager : MonoBehaviour
     {
         iScore = 0;
         iTeapots = 16;
-#if (TRACE_COLLISIONS)
-        iTotalLives = iLives = 50;  // A lot more lives for debugging shots before death.
-#else
-        iTotalLives = iLives = 3;
-#endif
-        player = GameObject.FindWithTag("Player");
-
         bGameOver = false;
         isGameActive = false;       // Not until Start button pressed
         gameOverText.gameObject.SetActive(false);
@@ -81,6 +84,28 @@ public class GameManager : MonoBehaviour
         teapotsTitleText.gameObject.SetActive(true);
         hiScoreElement.SetActive(true);
         startButton.gameObject.SetActive(true);
+        player = GameObject.FindWithTag("Player");
+
+#if (TEST_COLLISIONS)
+        // Believe player initialized by scene before GameManager.Start().
+        //// Great plan, but not true. mainCamera == null!
+        Debug.Log("GameManager.Start.player = " + player);
+
+        iTotalLives = iLives = 50;  // A lot more lives for debugging shots before death.
+
+        // Hard to just create a transform, so instantiate an entire object (inactive)
+        // just to appropriate its transform.
+        homeTarget = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        homeTarget.transform.position = new Vector3(-3, 2, 2);
+        homeTarget.SetActive(false);
+
+        // Just a differant way to create an object
+        homeCollider = new GameObject("homeCollider");
+        homeCollider.transform.position = new Vector3(3, 2, 2);
+        homeCollider.SetActive(false);
+#else
+        iTotalLives = iLives = 3;
+#endif
 
         // Stuff we should update from app memory
         //iHiScore
@@ -267,6 +292,148 @@ public class GameManager : MonoBehaviour
             }
         }
 #endif
+
+#if (TEST_COLLISIONS)
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            // Press 0 -> Delete target
+            if (testTarget != null)
+            {
+                Destroy(testTarget);
+                testTarget = null;
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            // Press 1 -> Delete collider
+            if (testCollider != null)
+            {
+                Destroy(testCollider);
+                testCollider = null;
+            }
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            // Press 2 -> Delete target; Instantiate teapot
+            if (testTarget != null)
+            {
+                Destroy(testTarget);
+            }
+            testTarget = Instantiate(teapotPrefab, homeTarget.transform.position, Quaternion.identity);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            // Press 3 -> Delete collider; Instantiate teapot; move left
+            if (testCollider != null)
+            {
+                Destroy(testCollider);
+            }
+            testCollider = Instantiate(teapotPrefab, homeCollider.transform.position, Quaternion.identity);
+            TeapotScript tpScript = testCollider.GetComponent<TeapotScript>();
+            tpScript.bTestVelocity = true;
+            Rigidbody teapotRB = testCollider.GetComponent<Rigidbody>();
+            teapotRB.velocity = new Vector3(-10, 0, 0);
+            //transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
+            //teapotRB.AddForce(transform.forward, ForceMode.Acceleration);
+            //child.position += Vector3.up * 10.0f;
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            // Press 4 -> Delete target; Instantiate charge
+            if (testTarget != null)
+            {
+                Destroy(testTarget);
+            }
+            testTarget = Instantiate(chargePrefab, homeTarget.transform.position, Quaternion.identity);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            // Press 5 -> Delete collider; Instantiate charge
+            if (testCollider != null)
+            {
+                Destroy(testCollider);
+            }
+            testCollider = Instantiate(chargePrefab, homeCollider.transform.position, Quaternion.identity);
+
+            //ChargeScript cScript = testCollider.GetComponent<ChargeScript>();
+            //cScript.bTestVelocity = true;
+            Rigidbody chargeRB = testCollider.GetComponent<Rigidbody>();
+            chargeRB.velocity = new Vector3(-10, 0, 0);
+            //transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
+            //teapotRB.AddForce(transform.forward, ForceMode.Acceleration);
+            //child.position += Vector3.up * 10.0f;
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            // Press 6 -> Delete target; Instantiate enemy shot
+            if (testTarget != null)
+            {
+                Destroy(testTarget);
+            }
+            testTarget = Instantiate(shotPrefab, homeTarget.transform.position, Quaternion.Euler(90,90,90));
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha7))
+        {
+            // Press 7 -> Delete collider; Instantiate enemy shot
+            if (testCollider != null)
+            {
+                Destroy(testCollider);
+            }
+            testCollider = Instantiate(shotPrefab, homeCollider.transform.position, Quaternion.Euler(90, 90, 90));
+
+            //ShotScript shotScript = testCollider.GetComponent<ShotScript>();
+            //shotScript.bTestVelocity = true;
+            Rigidbody shotRB = testCollider.GetComponent<Rigidbody>();
+            shotRB.velocity = new Vector3(-10, 0, 0);
+            //transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
+            //teapotRB.AddForce(transform.forward, ForceMode.Acceleration);
+            //child.position += Vector3.up * 10.0f;
+        }
+
+
+        // Don't instantiate new player ship because we then switch view based on NEW camera.
+        //if (Input.GetKeyDown(KeyCode.Alpha8)) {}
+        //if (Input.GetKeyDown(KeyCode.Alpha9)) { }
+        if (Input.GetKeyDown(KeyCode.Alpha8))
+        {
+            // Press 8 -> Delete target; Instantiate player (NO DUE TO EXTRA CAMERA)
+            if (testTarget != null)
+            {
+                Destroy(testTarget);
+            }
+            testTarget = Instantiate(playerPrefab, homeTarget.transform.position, Quaternion.identity);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha9))
+        {
+            // Press 9 -> Delete collider; Instantiate player (NO DUE TO EXTRA CAMERA)
+            if (testCollider != null)
+            {
+                Destroy(testCollider);
+            }
+            testCollider = Instantiate(playerPrefab, homeCollider.transform.position, Quaternion.identity);
+        }
+
+        //       // Make sure the shot is going the way the ship is pointing.
+        //       Rigidbody shotRB = shotObj.GetComponent<Rigidbody>();
+        //       shotRB.velocity = transform.up * shotSpeed;
+
+        /*
+        //        // Approximately what we want to do.
+        //        GameObject shotObj = Instantiate(shotPrefab,
+        //                    transform.position + (transform.rotation * spoutOffset),
+        //                    transform.rotation);
+        //                // Note: Matrix multiplication must be Quarternion * vector, not reverse.
+        */
+
+#endif  // TEST_COLLISIONS
+
+
         // Normal game play
 
         bFireEnabled = false;

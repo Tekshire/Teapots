@@ -1,6 +1,7 @@
-﻿#define TRACE_COLLISIONS
+﻿#undef TRACE_COLLISIONS
+#define TEST_COLLISIONS
 #define MOVE_TEAPOTS
-#define TEST_FIRE_SHOTS
+#undef TEST_FIRE_SHOTS  // If using alpha keys to test collisions, don't also fire shots
 
 using System.Collections;
 using System.Collections.Generic;
@@ -28,8 +29,8 @@ public class TeapotScript : MonoBehaviour
     public GameObject explosionPrefab;
     public GameObject shotPrefab;
     public ParticleSystem steamParticles;
-    public float shotSpeed = 5.0f;  // For now, 1/2 chargeSpeed (set in PayerController.Start().)
-    public float aimSpeed = 0.5f;
+    public float shotSpeed = 5.0f;  // For now, 1/2 chargeSpeed (set in PlayerController.Start().)
+    public float aimSpeed = 0.01f;
 
     static float maxVel = 2.0f;
     public AudioClip[] crashSoundArray = new AudioClip[6];
@@ -44,6 +45,9 @@ public class TeapotScript : MonoBehaviour
     // Values above are overridden by values entered into inspector.
     public static Quaternion spoutToFace = Quaternion.Euler(90, 0, 0);
 
+#if (TEST_COLLISIONS)
+    public bool bTestVelocity = false;
+#endif
 
     // Start is called before the first frame update
     void Start()
@@ -66,12 +70,10 @@ public class TeapotScript : MonoBehaviour
     {
         if (gameManager.isGameActive)
         {
-#if MOVE_TEAPOTS
+#if (MOVE_TEAPOTS && !TEST_COLLISIONS)
+            // REGULAR TEAPOT MOVEMENT
             // The center of our globular cluster is (0,0,0).
-            // this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
-            ////this.transform.RotateAround(Vector3.zero, axis, 5.0f);
-            transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed);
-            ///transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed * Time.deltaTime);
+            transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed * Time.deltaTime);
             /*
              * RotateAround() is depricated; suggestion is to use Rotate().
              * If i use the same axis vector for all teapots, they all orbit parallel to each other,
@@ -81,8 +83,29 @@ public class TeapotScript : MonoBehaviour
              * NOTE: IF WE DO MOVE TO USING FORCE, IT WILL HAVE TO BE DONE IN FIXEDUPDATE() INSTEAD 
              * OF UPDATE().
              */
-#endif
-            // As well as rotating about orbit, want spout facing player ship
+             // this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
+
+
+#elif (MOVE_TEAPOTS && TEST_COLLISIONS)
+            // Only allow collision test movement if teapots moving in general.
+            if (!bTestVelocity)
+            {
+                // Moving a regular teapot. (Should match conditionall code above.)
+                // The center of our globular cluster is (0,0,0).
+                transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed * Time.deltaTime);
+            }
+            else
+            {
+                // Should be target or colllider for collision test.
+
+            }
+
+#else
+            // Not moving teapots at all.
+            // else we allow set velocity to just carry on.
+#endif  // TEST_COLLISIONS
+
+            // Right now, in all cases, want spout facing player ship
             Vector3 direction = gameManager.player.transform.position - transform.position;
             // This is the quaternion that points the teapot's NORMAL face toward the player
             Quaternion rotation = Quaternion.LookRotation(direction);
@@ -90,7 +113,7 @@ public class TeapotScript : MonoBehaviour
             Quaternion aimDirection = rotation * spoutToFace;    // Use multiply to add 2 quaternions
             //transform.rotation = rotation * spoutToFace;    // Use multiply to add 2 quaternions
             transform.rotation = Quaternion.Lerp(transform.rotation, aimDirection, aimSpeed * Time.deltaTime);
-        }
+        }   // isGameActive
     }   // Update()
 
 

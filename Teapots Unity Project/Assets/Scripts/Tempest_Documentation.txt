@@ -117,3 +117,9 @@ Shot (isTrigger)
 				OnTriggerEnter()
 						Unity does not allow 1 trigger to interact with another trigger.
 
+
+Credits:
+Newell Teapot from Open GL Glut
+
+Sounds:
+Explosion glass debris blastwaveFX from Sound Snap, by BlastWave FX

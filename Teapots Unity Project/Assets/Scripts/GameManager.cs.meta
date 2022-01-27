@@ -4,11 +4,22 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
+  - testTarget: {instanceID: 0}
+  - testCollider: {instanceID: 0}
+  - playerPrefab: {fileID: 494884861356058557, guid: 51c8aafca9f554b918ec2681a2129cde,
+      type: 3}
   - livesText: {instanceID: 0}
   - scoreText: {instanceID: 0}
   - hiScoreText: {instanceID: 0}
-  - loScoreText: {instanceID: 0}
-  - teapotsText: {instanceID: 0}
+  - teapotsLeftText: {instanceID: 0}
+  - gameOverText: {instanceID: 0}
+  - winnerText: {instanceID: 0}
+  - teapotsTitleText: {instanceID: 0}
+  - startButton: {instanceID: 0}
+  - restartButton: {instanceID: 0}
+  - scoreElement: {instanceID: 0}
+  - hiScoreElement: {instanceID: 0}
+  - player: {instanceID: 0}
   - teapotPrefab: {fileID: 5840400238222320164, guid: df989eb2c183b4b41801373150403873,
       type: 3}
   executionOrder: 0

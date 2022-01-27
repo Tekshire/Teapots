@@ -1298,10 +1298,20 @@ MonoBehaviour:
   iTeapots: 0
   iLevel: 0
   tubeNum: 0
+  homeTarget: {fileID: 0}
+  homeCollider: {fileID: 0}
+  testTarget: {fileID: 0}
+  testCollider: {fileID: 0}
+  playerPrefab: {fileID: 494884861356058557, guid: 51c8aafca9f554b918ec2681a2129cde,
+    type: 3}
+  chargePrefab: {fileID: 2457680363345007208, guid: f9cf29e67fe344023b306ede00145c4b,
+    type: 3}
+  shotPrefab: {fileID: 8163183648981220355, guid: ace0927facb72400fae5e79a15c22136,
+    type: 3}
   teapotShotTimer: 0
   bFireEnabled: 0
   scorePerTeapot: 0
-  lastTeapotShot: 0
+  nextTeapotShot: 0
   teapotRotateVector: {x: 0, y: 0, z: 0}
   teapotRotateSpeed: 0
   livesText: {fileID: 806897453}
@@ -1335,6 +1345,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  hitNum: 0
 --- !u!4 &659512628
 Transform:
   m_ObjectHideFlags: 0
@@ -3081,9 +3092,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1797097881, guid: 51c8aafca9f554b918ec2681a2129cde, type: 3}
+      propertyPath: m_TagString
+      value: MainCamera
+      objectReference: {fileID: 0}
     - target: {fileID: 494884861356058557, guid: 51c8aafca9f554b918ec2681a2129cde,
         type: 3}
       propertyPath: m_Name
+      value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 494884861356058557, guid: 51c8aafca9f554b918ec2681a2129cde,
+        type: 3}
+      propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 494884861356489629, guid: 51c8aafca9f554b918ec2681a2129cde,

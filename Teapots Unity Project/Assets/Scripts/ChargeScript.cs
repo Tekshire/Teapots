@@ -1,4 +1,5 @@
-﻿#define TRACE_COLLISIONS
+﻿#undef TRACE_COLLISIONS
+#define TEST_COLLISIONS
 
 using System.Collections;
 using System.Collections.Generic;
