@@ -1,11 +1,12 @@
-﻿#undef TRACE_COLLISIONS
-#define TEST_COLLISIONS
+﻿#define TRACE_COLLISIONS
+#define COLLISION_TEST_JIG
 #define MOVE_TEAPOTS
 #undef TEST_FIRE_SHOTS  // If using alpha keys to test collisions, don't also fire shots
 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 
 // The original plan for teapot motion was to allow them to collide with each other and
 // the player's ship and then use physics to bounce away. In order to use physics, we needed
@@ -18,7 +19,7 @@ using UnityEngine;
 // so we no longer need it for that reason. 2. For Tempest in a Teapot, the original plan had
 // been to collide with the spout in order to dive down inside the teapot to play Tempest.
 // However that was too challenging, so latest plans just require colliding anywhere on the
-// teapot and then slurpping automatically to the spout. So i now no longer need teapot motion
+// teapot and then slurping automatically to the spout. So i now no longer need teapot motion
 // to be in FixedUpdate().
 
 public class TeapotScript : MonoBehaviour
@@ -36,7 +37,6 @@ public class TeapotScript : MonoBehaviour
     public AudioClip[] crashSoundArray = new AudioClip[6];
     public AudioClip explosionSound;    // purchased "Explosion Glass Blasstwave Fx".
     public AudioClip steamSound;        // PressurizedSteam from Particle Pack 5 package.
-    public int pointValue;
     public bool isTagged = false;
     public int index = -1;      // Valid indexes are 0 - 15.
 
@@ -45,14 +45,27 @@ public class TeapotScript : MonoBehaviour
     // Values above are overridden by values entered into inspector.
     public static Quaternion spoutToFace = Quaternion.Euler(90, 0, 0);
 
-#if (TEST_COLLISIONS)
-    public bool bTestVelocity = false;
+#if (COLLISION_TEST_JIG)
+    public float speed = 0.00001f;
+    public Rigidbody rb;
+    public Vector3 colliderMovement;
+
+    public bool bTestTarget = false;
+    public bool bTestCollider = false;
 #endif
 
     // Start is called before the first frame update
     void Start()
     {
+#if (TRACE_COLLISIONS)
+        Debug.Log("Teapot Start: ");
+#endif
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
+
+#if (COLLISION_TEST_JIG)
+        rb = this.GetComponent<Rigidbody>();
+        colliderMovement = new Vector3(500.0f, 0.0f, 0.0f);
+#endif
 
         //Fetch the Renderer component of the GameObject to change color
         m_Renderer = GetComponent<Renderer>();
@@ -61,21 +74,118 @@ public class TeapotScript : MonoBehaviour
         // Each teapot has a child particle system to provide steam for shot launch.
         steamParticles = GetComponentInChildren<ParticleSystem>();
         //Debug.Log("Start FindObjectsOfType<ParticleSystem>: " + steamParticles + "\n");
-
-        pointValue = 1000;  // Depends upon game level
     }
 
 
+    // Want to apply physics to teapots, so move him in FixedUpdate.
+    void FixedUpdate()
+    {
+#if (TRACE_COLLISIONS)
+        Debug.Log("Teapot FixedUpdate.index: " + index);
+#endif
+
+#if (COLLISION_TEST_JIG)
+        if (bTestCollider)
+        {
+#if (TRACE_COLLISIONS)
+            Debug.Log("Teapot.FixedUpdate bTestCollider @ (" +
+                colliderMovement.x + ", " + colliderMovement.y +
+                ", " + colliderMovement.z + ")");
+#endif
+            // Add the motion from collider to target. ie. left
+            rb.AddForce(colliderMovement, ForceMode.Impulse);
+
+
+          //ForceMode.Force: Interprets the input as force (measured in Newtons), and changes the velocity by the value of force* DT / mass.The effect depends on the simulation step length and the mass of the body.
+          //ForceMode.Acceleration: Interprets the parameter as acceleration (measured in meters per second squared), and changes the velocity by the value of force* DT. The effect depends on the simulation step length but doesn't depend on the mass of the body.
+          //ForceMode.Impulse: Interprets the parameter as an impulse(measured in Newtons per second), and changes the velocity by the value of force / mass.The effect depends on the mass of the body but doesn't depend on the simulation step length.
+          //ForceMode.VelocityChange: Interprets the parameter as a direct velocity change(measured in meters per second), and changes the velocity by the value of force.The effect doesn't depend on the mass of the body or the simulation step length.
+
+        }
+        else if (bTestTarget)
+        {
+#if (TRACE_COLLISIONS)
+            Debug.Log("Teapot.FixedUpdate bTestTarget");
+#endif
+            // Target does not move. It just stays here to get hit.
+        }
+        else
+        {   // final else
+            // Normal teapot movement
+#if (TRACE_COLLISIONS)
+            Debug.Log("Teapot Normal Movement");
+#endif
+#endif  // COLLISION_TEST_JIG
+
+            if (gameManager.isGameActive)
+            {
+#if (MOVE_TEAPOTS)
+#if (TRACE_COLLISIONS)
+                Debug.Log("Teapot Actually Moves");
+#endif
+                // REGULAR TEAPOT MOVEMENT
+                // The center of our globular cluster is (0,0,0).
+                transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed);
+                /*
+                 * RotateAround() is deprecated; suggestion is to use Rotate().
+                 * If i use the same axis vector for all teapots, they all orbit parallel to each other,
+                 * so there should be no collisions. OK for first pass. Not sure if basis for RotateAround
+                 * is Translate or AddForce. If the former, collisions will not respond to physics, so may
+                 * need a way to escape from RotateAround if collied with (using "isTagged" variable).
+                 * NOTE: IF WE DO MOVE TO USING FORCE, IT WILL HAVE TO BE DONE IN FIXEDUPDATE() INSTEAD 
+                 * OF UPDATE().
+                 */
+                // this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
+#endif  // MOVE_TEAPOTS
+            }   // gameManager.isGameActive
+
+#if (COLLISION_TEST_JIG)
+        }   // final else
+#endif  // COLLISION_TEST_JIG
+    }
+
+
+    // Using rb.AddForce which adds speed and slows
+    //    void MoveCharacter(Vector3 direction)
+    //    {
+    //        rb.AddForce(direction * speed);
+    //    }
+
+    //    // Using rb.velocity overrides all other forces including gravity.
+    //    void MoveCharacter(Vector3 direction)
+    //    {
+    //        rb.velocity = direction * speed;
+    //    }
+
+
+#if false
     void Update()
     {
+#if (TRACE_COLLISIONS)
+        Debug.Log("Teapot Update: ");
+#endif
+#if (COLLISION_TEST_JIG)
+        // Move test objects velocity even if all other teapot motion stopped
+        ///        if (bTestVelocity)
+        ///        {
+        ///            colliderMovement = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        ///
+        ///            Rigidbody rb = GetComponent<Rigidbody>();
+        ///            Vector3 vel = rb.velocity;
+        ///
+        ///            // Collider is only object that sets bTestVelocity.
+        ///        }
+#endif
+
         if (gameManager.isGameActive)
         {
-#if (MOVE_TEAPOTS && !TEST_COLLISIONS)
+            //#if (MOVE_TEAPOTS && !COLLISION_TEST_JIG)
+#if (MOVE_TEAPOTS)
             // REGULAR TEAPOT MOVEMENT
             // The center of our globular cluster is (0,0,0).
             transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed * Time.deltaTime);
             /*
-             * RotateAround() is depricated; suggestion is to use Rotate().
+             * RotateAround() is deprecated; suggestion is to use Rotate().
              * If i use the same axis vector for all teapots, they all orbit parallel to each other,
              * so there should be no collisions. OK for first pass. Not sure if basis for RotateAround
              * is Translate or AddForce. If the former, collisions will not respond to physics, so may
@@ -83,27 +193,8 @@ public class TeapotScript : MonoBehaviour
              * NOTE: IF WE DO MOVE TO USING FORCE, IT WILL HAVE TO BE DONE IN FIXEDUPDATE() INSTEAD 
              * OF UPDATE().
              */
-             // this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
-
-
-#elif (MOVE_TEAPOTS && TEST_COLLISIONS)
-            // Only allow collision test movement if teapots moving in general.
-            if (!bTestVelocity)
-            {
-                // Moving a regular teapot. (Should match conditionall code above.)
-                // The center of our globular cluster is (0,0,0).
-                transform.RotateAround(Vector3.zero, gameManager.teapotRotateVector, gameManager.teapotRotateSpeed * Time.deltaTime);
-            }
-            else
-            {
-                // Should be target or colllider for collision test.
-
-            }
-
-#else
-            // Not moving teapots at all.
-            // else we allow set velocity to just carry on.
-#endif  // TEST_COLLISIONS
+            // this.transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
+#endif  // MOVE_TEAPOTS
 
             // Right now, in all cases, want spout facing player ship
             Vector3 direction = gameManager.player.transform.position - transform.position;
@@ -111,10 +202,11 @@ public class TeapotScript : MonoBehaviour
             Quaternion rotation = Quaternion.LookRotation(direction);
             // Now adjust the direction to point the spout toward the player
             Quaternion aimDirection = rotation * spoutToFace;    // Use multiply to add 2 quaternions
-            //transform.rotation = rotation * spoutToFace;    // Use multiply to add 2 quaternions
             transform.rotation = Quaternion.Lerp(transform.rotation, aimDirection, aimSpeed * Time.deltaTime);
         }   // isGameActive
     }   // Update()
+
+#endif  // false    Update
 
 
     // When firing enemy shots from Update(), shots did not fire from tip of teapot spout.
@@ -205,7 +297,6 @@ public class TeapotScript : MonoBehaviour
                 int newShotNum = gameManager.lastShotNum + 1;
                 sScript.shotNum = newShotNum;
                 gameManager.lastShotNum = newShotNum;
-
 #endif
 
                 // shot sound from teapot is actually sound of steam coming from pot.
@@ -218,22 +309,6 @@ public class TeapotScript : MonoBehaviour
                 gameManager.nextTeapotShot = nextPossibleTeapotToShoot;
 
 
-#if false
-                Vector3 shotPos = transform.position + spoutOffset;
-                Debug.Log("Shooting from teapot[" + index + "]\n" +
-                    "transform.localPosition: x = " + transform.localPosition.x + ", y = " +
-                    transform.localPosition.y + ", z = " + transform.localPosition.z + "\n" +
-                    "transform.position: x = " + transform.position.x + ", y = " +
-                    transform.position.y + ", z = " + transform.position.z + "\n" +
-                    "spoutOffset: x = " + spoutOffset.x + ", y = " +
-                    spoutOffset.y + ", z = " + spoutOffset.z + "\n" +
-                    "shotPos: x = " + shotPos.x + ", y = " +
-                    shotPos.y + ", z = " + shotPos.z + "\n" +
-                    "teapot spout: x = " + shotObj.transform.position.x + ", y = " +
-                    shotObj.transform.position.y + ", z = " + shotObj.transform.position.z + "\n" +
-                    "transform.rotation: " + transform.rotation + "\n"
-                    );
-#endif
             }
 
         }   // isGameActive
@@ -275,7 +350,7 @@ public class TeapotScript : MonoBehaviour
             //       Destroy(gameObject);
             //   StartCoroutine(DelayDeath());
 
-            gameManager.UpdateScore(pointValue);
+            gameManager.UpdateScore(gameManager.teapotPointValue);
         }   // Charge
     }
 
@@ -318,5 +393,27 @@ public class TeapotScript : MonoBehaviour
         }   // isGameActive
     }
 
+
+
+
 }
 
+
+
+
+#if false
+                Vector3 shotPos = transform.position + spoutOffset;
+                Debug.Log("Shooting from teapot[" + index + "]\n" +
+                    "transform.localPosition: x = " + transform.localPosition.x + ", y = " +
+                    transform.localPosition.y + ", z = " + transform.localPosition.z + "\n" +
+                    "transform.position: x = " + transform.position.x + ", y = " +
+                    transform.position.y + ", z = " + transform.position.z + "\n" +
+                    "spoutOffset: x = " + spoutOffset.x + ", y = " +
+                    spoutOffset.y + ", z = " + spoutOffset.z + "\n" +
+                    "shotPos: x = " + shotPos.x + ", y = " +
+                    shotPos.y + ", z = " + shotPos.z + "\n" +
+                    "teapot spout: x = " + shotObj.transform.position.x + ", y = " +
+                    shotObj.transform.position.y + ", z = " + shotObj.transform.position.z + "\n" +
+                    "transform.rotation: " + transform.rotation + "\n"
+                    );
+#endif

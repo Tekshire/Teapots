@@ -1,5 +1,5 @@
-#undef TRACE_COLLISIONS
-#define TEST_COLLISIONS
+#define TRACE_COLLISIONS
+#define COLLISION_TEST_JIG
 
 using System.Collections;
 using System.Collections.Generic;
@@ -8,22 +8,19 @@ using UnityEngine;
 // This is for the enemy shots, not the player 'charges'.
 public class ShotScript : MonoBehaviour
 {
+    public GameManager gameManager;
     private const float maxShotDist = 40f;
     public float shotSpeed;
-    public GameManager gameManager;
 #if (TRACE_COLLISIONS)
-    public int shotNum; // Only care which shot hits player when debugging.
+    public int shotNum = 0; // Only care which shot hits player when debugging.
 #endif
 
 
     void Start()
     {
         gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
-#if (TRACE_COLLISIONS)
-    shotNum = gameManager.lastShotNum++; // Only care which shot hits player when debugging.
-#endif
 
-}
+    }
 
 void Update()
     {
@@ -48,56 +45,36 @@ void Update()
 
     }
 
+
+#if false
     // Here the "other" object is entering our shot's trigger area.
     //Note: Both GameObjects must contain a Collider component.One must have Collider.isTrigger enabled,
     // and contain a Rigidbody. If both GameObjects have Collider.isTrigger enabled, no collision happens.
     // The same applies when both GameObjects do not have a Rigidbody component.
-    // (So can't have shot hit charge abecause both have triggers?)
+    // (So can't have shot hit charge because both have triggers?)
 
     private void OnTriggerEnter(Collider other)
     {
 #if (TRACE_COLLISIONS)
         Debug.Log("Shot.OnTriggerEnter: " + gameObject + " triggered by " + other.gameObject);
 #endif
-        // Enemy shot only wants to blow up player.
-        if (other.gameObject.CompareTag("Player"))
+        if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
         {
-            // TEST
-            gameManager.hitNum++;
-
-            // Player destruction now happens in player script.
-            //Destroy(other.gameObject);
-            //Destroy(gameObject);
-            // At this point we are only collecting collision info:
-
-#if (TRACE_COLLISIONS)
-            Debug.Log("Shot OnTriggerEnter: " + gameObject + " triggered by " + other.gameObject);
-            Debug.Log(" HitNum: " + gameManager.hitNum);
-            Debug.Log(" Can we tell what part of player we hit? " + other.gameObject);
-#endif
-
+            // If shot hits player or player hits shot, both cases will call both shot.OnTriggerEnter()
+            // and player.OnTriggerEnter(). Only implement player.OnTriggerEnter because Player will
+            // have the most logic to implement.
+            if (other.gameObject.CompareTag("Player"))
+            {
+            }
+            // Any other GameObjects hit Shot trigger?
         }
-        if (other.gameObject.CompareTag("Teapot"))
-        {
-        }
-        if (other.gameObject.CompareTag("Charge"))
-        {
-        }
-        if (other.gameObject.CompareTag("EnemyShot"))
-        {
-        }
-        else
-            Debug.Log("Shot OnTriggerEnter with no match: " + other.gameObject);
-
-
     }
+#endif  // false
 
-
-    private void OnCollisionEnter(Collision collision)
-    {
-#if (TRACE_COLLISIONS)
-        Debug.Log("Shot OnCollisionEnter: " + gameObject + " collided with " + collision.gameObject);
-#endif
-        // Just seeing if we come here at all.
-    }
 }
+
+
+
+
+
+

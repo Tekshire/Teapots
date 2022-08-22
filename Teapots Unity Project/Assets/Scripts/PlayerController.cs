@@ -2,8 +2,8 @@
 #undef DEBUG_ANGLE_X
 #undef TEST_BACK_FLIP
 #undef TEST_GYROSCOPE
-#undef TRACE_COLLISIONS
-#define TEST_COLLISIONS
+#define TRACE_COLLISIONS
+#define COLLISION_TEST_JIG
 
 using System.Collections;
 using System.Collections.Generic;
@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour
     public AudioSource playerAudioSource;
     public AudioClip chargeSound;
     public GameManager gameManager; // change to private after we let inspector show we get value.
+    public bool playerAlreadyShot = false; // Only first shot to hit player causes death
 
 
 #if (DEBUG_ANGLE_Y)
@@ -466,7 +467,6 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 // launch projectile
-                ///GameObject sgo = Instantiate(chargePrefab, transform.position, chargePrefab.transform.rotation);
                 GameObject sgo = Instantiate(chargePrefab, transform.position, transform.rotation);
                 // Make sure the shot is going the way the ship is pointing.
                 Rigidbody srb = sgo.GetComponent<Rigidbody>();
@@ -491,10 +491,11 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
     }
 
 
-#if (TRACE_COLLISIONS)
     private void OnTriggerEnter(Collider other)
     {
+#if (TRACE_COLLISIONS)
         Debug.Log("Player OnTriggerEnter: " + gameObject + " triggered by " + other.gameObject);
+#endif
         if (gameManager.isGameActive)  // No input, spawning, or scoring if game not active.
         {
             // When we first fire a shot, when the charge is created, it is within the
@@ -502,18 +503,44 @@ void FixedUpdate()     // Don't need Time.deltaTime when using FixedUpdate.
             // Check tag to avoid this situation.
             if (other.CompareTag("Charge")) return;
 
-            // So far, there are only 2 ojects with triggers: charges and enemy shots.
-            // (I suppose later we may have flippers etc that may have triggers.)
-            // Player probably does not move fast enough to catch up to any of its own charges,
-            // so any trigger enter must be for enemy shot. But maybe check tag just to be sure
-            if (other.CompareTag("EnemyShot")) return;
-
-            gameManager.UpdateLives(-1);
-        }   // isGameActive
-
+            // So far, there are only 2 ojects with triggers: charges and enemy shots. Charges are
+            // handled above, so take care of shots here. (And later flippers, etc)
+            // But maybe check tag just to be sure
+            if (other.CompareTag("EnemyShot"))
+            {
+                // If the player has already been shot, don't start a second destruction.
+                if (!playerAlreadyShot)
+                {
+                    playerAlreadyShot = true;   // Don't come back here
+                                                // Player destruction now happens in player script as does:
+                    Debug.Log(" Can we tell what part of player we hit? " + other.gameObject);
+/*
+    // Print how many points are colliding this transform
+    // And print the first point that is colliding.
+    void OnCollisionEnter(Collision other)
+    {
+        print("Points colliding: " + other.contacts.Length);
+        print("First point that collided: " + other.contacts[0].point);
     }
+*/
+                    // Shot vanishes before explosions happen
+                    Destroy(other.gameObject);
+                    // Start the sequence of explosions.
+                    // Then get rid of ship framework while explosions now finishing up.
+#if (TRACE_COLLISIONS)
+                    Debug.Log("Shot OnTriggerEnter with no match: " + other.gameObject);
 #endif
+                    // If we destroy player, we no longer have display because camera went away with ship.
+                    // Need to come up with new way to free camera after ship explodes and then start new level.
+                    //Destroy(gameObject);
+                    gameManager.UpdateLives(-1);
 
-
-}
+                }   // !playerAlreadyShot
+            }   // EnemyShot
+#if (TRACE_COLLISIONS)
+            Debug.Log("Shot OnTriggerEnter with no match: " + other.gameObject);
+#endif
+        }   // isGameActive
+    }   // OnTriggerEnter
+}   // PlayerController
 

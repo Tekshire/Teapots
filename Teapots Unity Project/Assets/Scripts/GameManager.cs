@@ -1,7 +1,7 @@
 ﻿#define TEST_LOSE_LIFE
 #define TEST_LOSE_TEAPOT
-#undef TRACE_COLLISIONS
-#define TEST_COLLISIONS
+#define TRACE_COLLISIONS
+#define COLLISION_TEST_JIG
 
 using System.Collections;
 using System.Collections.Generic;
@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
 #if (TRACE_COLLISIONS)
     public int lastShotNum = 0; // Only care which shot hits player when debugging.
 #endif
-#if (TEST_COLLISIONS)
+#if (COLLISION_TEST_JIG)
     public GameObject homeTarget;
     public GameObject homeCollider;
     public GameObject testTarget;
@@ -42,7 +42,8 @@ public class GameManager : MonoBehaviour
     public float teapotShotTimer;
     public const int iMaxShotTimer = 100;  // Max tube num = 96, * 60 frames / sec (Admitidly optimistic)
     public bool bFireEnabled = false;
-    public int scorePerTeapot;
+//    public int scorePerTeapot;          // How are these 2 different?
+    public int teapotPointValue;        // How are these 2 different?
     public int nextTeapotShot;  // Spread chance to shoot around to other teapots.
     public Vector3 teapotRotateVector;
     public float teapotRotateSpeed;     // Will be multiplied by Time.deltaTime
@@ -86,7 +87,7 @@ public class GameManager : MonoBehaviour
         startButton.gameObject.SetActive(true);
         player = GameObject.FindWithTag("Player");
 
-#if (TEST_COLLISIONS)
+#if (COLLISION_TEST_JIG)
         // Believe player initialized by scene before GameManager.Start().
         //// Great plan, but not true. mainCamera == null!
         Debug.Log("GameManager.Start.player = " + player);
@@ -96,12 +97,14 @@ public class GameManager : MonoBehaviour
         // Hard to just create a transform, so instantiate an entire object (inactive)
         // just to appropriate its transform.
         homeTarget = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        homeTarget.transform.position = new Vector3(-3, 2, 2);
+        //homeTarget.transform.position = new Vector3(-3, 2, 2);
+        homeTarget.transform.position = new Vector3(-3, .5f, 2);
         homeTarget.SetActive(false);
 
         // Just a differant way to create an object
         homeCollider = new GameObject("homeCollider");
-        homeCollider.transform.position = new Vector3(3, 2, 2);
+        //homeCollider.transform.position = new Vector3(3, 2, 2);
+        homeCollider.transform.position = new Vector3(3, .5f, 2);
         homeCollider.SetActive(false);
 #else
         iTotalLives = iLives = 3;
@@ -125,7 +128,7 @@ public class GameManager : MonoBehaviour
     public void StartNewLevel(int level)
     {
         teapotShotTimer = 0.0f;
-        scorePerTeapot = 1000 + (500 * iLevel);
+        teapotPointValue = 1000 + (200 * iLevel);
         Color levelColor;   // will be assigned to each teapot because color can change during game play.
 
         // Originally each teapot had its own axis to spin around, but that allowed
@@ -216,7 +219,7 @@ public class GameManager : MonoBehaviour
         }
 
         // TEST:
-        hitNum = 0;     // For this level no enemy shots have hit player.
+        hitNum = -1;     // For this level no enemy shots have hit player.
     }
 
 
@@ -293,7 +296,7 @@ public class GameManager : MonoBehaviour
         }
 #endif
 
-#if (TEST_COLLISIONS)
+#if (COLLISION_TEST_JIG)
         if (Input.GetKeyDown(KeyCode.Alpha0))
         {
             // Press 0 -> Delete target
@@ -322,6 +325,10 @@ public class GameManager : MonoBehaviour
                 Destroy(testTarget);
             }
             testTarget = Instantiate(teapotPrefab, homeTarget.transform.position, Quaternion.identity);
+            TeapotScript tpScript = testTarget.GetComponent<TeapotScript>();
+            tpScript.bTestTarget = true;
+            Rigidbody teapotRB = testTarget.GetComponent<Rigidbody>();  // Not Needed
+            teapotRB.velocity = new Vector3(0, 0, 0);  // Not Needed
         }
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
@@ -332,9 +339,9 @@ public class GameManager : MonoBehaviour
             }
             testCollider = Instantiate(teapotPrefab, homeCollider.transform.position, Quaternion.identity);
             TeapotScript tpScript = testCollider.GetComponent<TeapotScript>();
-            tpScript.bTestVelocity = true;
+            tpScript.bTestCollider = true;
             Rigidbody teapotRB = testCollider.GetComponent<Rigidbody>();
-            teapotRB.velocity = new Vector3(-10, 0, 0);
+            teapotRB.velocity = new Vector3(-10, 0, 0);   // (-200, 0, 0)
             //transform.GetComponent<Rigidbody>().AddForce(transform.forward, ForceMode.Acceleration);
             //teapotRB.AddForce(transform.forward, ForceMode.Acceleration);
             //child.position += Vector3.up * 10.0f;
@@ -419,19 +426,7 @@ public class GameManager : MonoBehaviour
             testCollider = Instantiate(playerPrefab, homeCollider.transform.position, Quaternion.identity);
         }
 
-        //       // Make sure the shot is going the way the ship is pointing.
-        //       Rigidbody shotRB = shotObj.GetComponent<Rigidbody>();
-        //       shotRB.velocity = transform.up * shotSpeed;
-
-        /*
-        //        // Approximately what we want to do.
-        //        GameObject shotObj = Instantiate(shotPrefab,
-        //                    transform.position + (transform.rotation * spoutOffset),
-        //                    transform.rotation);
-        //                // Note: Matrix multiplication must be Quarternion * vector, not reverse.
-        */
-
-#endif  // TEST_COLLISIONS
+#endif  // COLLISION_TEST_JIG
 
 
         // Normal game play
